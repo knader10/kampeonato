@@ -1,0 +1,135 @@
+{% extends "base_public.html" %}
+
+{% block title %}KAMPEONATO - Sistema de Gerenciamento de Campeonatos{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-hero text-white">
+    <div class="max-w-7xl mx-auto px-4 py-20">
+        <div class="text-center fade-in">
+            <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <i class="bi bi-trophy text-4xl"></i>
+            </div>
+            
+            <h1 class="text-5xl md:text-6xl font-bold mb-6 slide-in-left">
+                KAMPEONATO
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto slide-in-right">
+                Sistema completo para gerenciamento de campeonatos de futebol.
+                Organize, gerencie e acompanhe seus torneios de forma profissional.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'campeonato:painel_login' %}"
+                   class="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center">
+                    <i class="bi bi-person mr-2"></i>Acessar Painel
+                </a>
+                <a href="#campeonatos" 
+                   class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center">
+                    <i class="bi bi-search mr-2"></i>Buscar Campeonatos
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Resto do conteúdo da página inicial... -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold text-gray-800 mb-8">
+            Sistema em Desenvolvimento
+        </h2>
+        <p class="text-lg text-gray-600 mb-8">
+            Estamos migrando do Vue.js para Django puro com templates.
+            Em breve todas as funcionalidades estarão disponíveis.
+        </p>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">
+                <i class="bi bi-info-circle mr-2"></i>Status da Migração
+            </h3>
+            <ul class="text-left text-blue-700 space-y-2">
+                <li><i class="bi bi-check-circle text-green-600 mr-2"></i>Página pública criada</li>
+                <li><i class="bi bi-check-circle text-green-600 mr-2"></i>Sistema de busca implementado</li>
+                <li><i class="bi bi-check-circle text-green-600 mr-2"></i>URLs públicas configuradas</li>
+                <li><i class="bi bi-check-circle text-green-600 mr-2"></i>Template base moderno</li>
+                <li><i class="bi bi-clock text-orange-500 mr-2"></i>Painel administrativo (em progresso)</li>
+                <li><i class="bi bi-clock text-orange-500 mr-2"></i>Funcionalidades completas (em progresso)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'campeonato:painel_login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'campeonato:painel_registro' %}">Cadastre-se</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4">Bem-vindo ao Kampeonato</h1>
+            <p class="lead">O melhor sistema para gerenciar seus campeonatos de futebol</p>
+            <div class="mt-4">
+                <a href="{% url 'campeonato:painel_login' %}" class="btn btn-primary btn-lg btn-action">Fazer Login</a>
+                <a href="{% url 'campeonato:painel_registro' %}" class="btn btn-outline-light btn-lg btn-action">Criar Conta</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="features-section">
+        <div class="container">
+            <h2 class="text-center mb-5">Por que escolher o Kampeonato?</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Gerenciamento de Times</h3>
+                            <p class="card-text">Cadastre e gerencie todos os times participantes do seu campeonato com facilidade.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Controle de Jogadores</h3>
+                            <p class="card-text">Mantenha registro detalhado de todos os jogadores, incluindo estatísticas e desempenho.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Tabelas Automáticas</h3>
+                            <p class="card-text">Tabelas de classificação e artilharia atualizadas automaticamente após cada partida.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container text-center mt-5">
+        <h2>Comece agora mesmo!</h2>
+        <p class="lead">Crie sua conta e organize seus campeonatos como um profissional.</p>
+        <a href="{% url 'campeonato:painel_registro' %}" class="btn btn-success btn-lg mt-3 mb-5">Cadastre-se Gratuitamente</a>
+    </div>
+
+    <footer class="footer text-center">
+        <div class="container">
+            <p>© 2023 Kampeonato - Sistema de Gerenciamento de Campeonatos</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

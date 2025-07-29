@@ -1,0 +1,1606 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Gerenciar {{ campeonato.nome }} - Kampeonato Admin{% endblock %}
+
+{% block content %}
+<div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+    <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-600">Carregando dados do campeonato...</p>
+    </div>
+</div>
+
+<div id="main-content" class="opacity-0 transition-opacity duration-500">
+<div>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Gerenciar: {{ campeonato.nome }} - {{ campeonato.edicao }}</h1>
+        <a href="{% url 'campeonato:campeonatos_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left mr-2"></i> Voltar para Campeonatos
+        </a>
+    </div>
+
+    {% if campeonato.status == 'finalizado' %}
+    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+        <i class="bi bi-lock text-red-600 text-xl"></i>
+        <div>
+            <span class="text-red-800 font-semibold">Campeonato Finalizado</span>
+            <p class="text-red-700 text-sm mt-1">Este campeonato foi finalizado e não permite mais alterações.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    
+    {% comment %} {% if campeonato.permite_transferencia %}
+    <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+        <i class="bi bi-arrow-left-right text-green-600 text-xl"></i>
+        <span class="text-green-800 font-semibold">Transferências de jogadores entre times estão <span class="underline">habilitadas</span> neste campeonato.</span>
+    </div>
+    {% else %}
+    <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2">
+        <i class="bi bi-x-octagon text-yellow-600 text-xl"></i>
+        <span class="text-yellow-800 font-semibold">Transferências de jogadores entre times <span class="underline">não são permitidas</span> neste campeonato.</span>
+    </div>
+    {% endif %} {% endcomment %}
+
+    <!-- Nav Tabs -->
+    <div class="mb-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8">
+                <button id="geral-tab" class="tab-button active border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600" onclick="showTab('geral')">
+                    <i class="bi bi-trophy mr-2"></i>Geral
+                </button>
+                <button id="rodadas-tab" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" onclick="showTab('rodadas')">
+                    <i class="bi bi-calendar-event mr-2"></i>Rodadas & Partidas
+                </button>
+                <button id="times-tab" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" onclick="showTab('times')">
+                    <i class="bi bi-shield mr-2"></i>Times
+                </button>
+
+                <button id="profissionais-tab" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" onclick="showTab('profissionais')">
+                    <i class="bi bi-person-badge mr-2"></i>Profissionais
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="tab-content">
+        <!-- Aba Geral -->
+        <div id="geral-content" class="tab-content">
+            {% include 'campeonato/geral_tab.html' %}
+        </div>
+
+        <!-- Times Tab -->
+        <div id="times-content" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4 flex justify-between items-center">
+                    <h2 class="font-semibold text-lg text-white">Times Participantes</h2>
+                    {% if not campeonato_finalizado %}
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+                                onclick="openModal('vincularTimeModal')">
+                            <i class="bi bi-plus-circle mr-2"></i> Vincular Time
+                        </button>
+                    {% else %}
+                        <button class="bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center cursor-not-allowed" disabled>
+                            <i class="bi bi-lock mr-2"></i> Campeonato Finalizado
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="p-6">
+                    {% if times_campeonato %}
+                        <div class="space-y-4">
+                            {% for time_campeonato in times_campeonato %}
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <h6 class="font-semibold text-gray-900 mb-2">{{ time_campeonato.time.nome }}</h6>
+                                            {% if time_campeonato.presidente or time_campeonato.campo_estadio or time_campeonato.localizacao %}
+                                                <div class="text-sm text-gray-600 space-y-1">
+                                                    {% if time_campeonato.presidente %}<div><span class="font-medium">Presidente:</span> {{ time_campeonato.presidente }}</div>{% endif %}
+                                                    {% if time_campeonato.campo_estadio %}<div><span class="font-medium">Campo:</span> {{ time_campeonato.campo_estadio }}</div>{% endif %}
+                                                    {% if time_campeonato.localizacao %}<div><span class="font-medium">Localização:</span> {{ time_campeonato.localizacao }}</div>{% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button class="btn btn-primary text-sm" data-time-campeonato-id="{{ time_campeonato.id }}" onclick="loadAndOpenModal('jogadoresVinculadosModal{{ time_campeonato.id }}', this)">
+                                                <i class="bi bi-eye mr-1"></i> Ver Jogadores ({{ time_campeonato.jogadores_count|default:0 }})
+                                            </button>
+                                            <!-- Botão Editar -->
+                                            <button class="btn bg-purple-600 hover:bg-purple-700 text-white text-sm" data-time-campeonato-id="{{ time_campeonato.id }}" onclick="openModal('editarTimeCampeonatoModal{{ time_campeonato.id }}')">
+                                                <i class="bi bi-pencil-square mr-1"></i> Editar
+                                            </button>
+                                            <button class="btn btn-success text-sm" data-time-campeonato-id="{{ time_campeonato.id }}" onclick="loadAndOpenModal('jogadoresModal{{ time_campeonato.id }}', this)">
+                                                <i class="bi bi-plus mr-1"></i> Vincular
+                                            </button>
+                                            <form method="post" action="{% url 'campeonato:desvincular_time_campeonato' campeonato.id time_campeonato.id %}" class="inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger text-sm" onclick="return confirm('Tem certeza que deseja desvincular este time?')">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Jogadores do time -->
+                                    <div class="mt-4">
+                                        <span class="font-medium text-gray-700">Jogadores:</span>
+                                        {% with jogadores=time_campeonato.jogadores_ativos %}
+                                            {% if jogadores %}
+                                                <div class="mt-2 flex flex-wrap gap-2">
+                                                    {% for jogador_time in jogadores|slice:":10" %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            {{ jogador_time.jogador.nome }}
+                                                        </span>
+                                                    {% endfor %}
+                                                    {% if jogadores|length > 10 %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                            +{{ jogadores|length|add:"-10" }} mais
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="mt-2 text-sm text-gray-600">
+                                                    Total: {{ time_campeonato.jogadores_count|default:jogadores|length }} jogador{{ time_campeonato.jogadores_count|default:jogadores|length|pluralize }}
+                                                </div>
+                                            {% else %}
+                                                <span class="text-sm text-gray-500 ml-2">Nenhum jogador vinculado</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+
+                                <!-- Modal para visualizar jogadores vinculados -->
+                                <div id="jogadoresVinculadosModal{{ time_campeonato.id }}" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeModalOnBackdrop(event, 'jogadoresVinculadosModal{{ time_campeonato.id }}')">
+                                    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                                        <div class="mt-3">
+                                            <div class="flex justify-between items-center mb-4">
+                                                <h3 class="text-lg font-medium text-gray-900">Jogadores Vinculados - {{ time_campeonato.time.nome }}</h3>
+                                                <button onclick="closeModal('jogadoresVinculadosModal{{ time_campeonato.id }}')" class="text-gray-400 hover:text-gray-600">
+                                                    <i class="bi bi-x-lg text-xl"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Caixa de pesquisa para jogadores vinculados -->
+                                            <div class="mb-4">
+                                                <div class="relative">
+                                                    <input 
+                                                        type="text" 
+                                                        id="searchJogadorVinculado{{ time_campeonato.id }}" 
+                                                        placeholder="Pesquisar jogador vinculado..." 
+                                                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        oninput="filterJogadoresVinculados({{ time_campeonato.id }})"
+                                                    >
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <i class="bi bi-search text-gray-400"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Lista de jogadores vinculados -->
+                                            <div class="space-y-3 max-h-96 overflow-y-auto" id="jogadoresVinculadosList{{ time_campeonato.id }}">
+                                                {% for jogador_time in time_campeonato.jogadores_ativos|slice:":20" %}
+                                                    <div class="jogador-vinculado-item-{{ time_campeonato.id }} bg-gray-50 rounded-lg p-4 border border-gray-200" data-jogador-vinculado-info="{{ jogador_time.jogador.nome|lower }} {{ jogador_time.jogador.cidade|lower }} {{ jogador_time.jogador.telefone|default_if_none:"" }}">
+                                                            <div class="flex items-center justify-between">
+                                                                <div class="flex items-center flex-1">
+                                                                    {% if jogador_time.jogador.foto %}
+                                                                        <img src="{{ jogador_time.jogador.foto.url }}" alt="{{ jogador_time.jogador.nome }}" class="h-12 w-12 rounded-full mr-4">
+                                                                    {% else %}
+                                                                        <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-4">
+                                                                            <i class="bi bi-person text-lg"></i>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                    <div class="flex-1">
+                                                                        <div class="font-semibold text-gray-900">{{ jogador_time.jogador.nome }}</div>
+                                                                        <div class="text-sm text-gray-600">
+                                                                            <div>{{ jogador_time.jogador.cidade }} - {{ jogador_time.jogador.data_nascimento|date:"d/m/Y" }}</div>
+                                                                            {% if jogador_time.jogador.telefone %}
+                                                                                <div>Tel: {{ jogador_time.jogador.telefone }}</div>
+                                                                            {% endif %}
+                                                                            <div class="text-xs text-green-600 mt-1">
+                                                                                <i class="bi bi-calendar mr-1"></i>Vinculado em: {{ jogador_time.data_entrada|date:"d/m/Y" }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex gap-2">
+                                                                    <a href="{% url 'campeonato:jogador_detail' jogador_time.jogador.id %}" class="btn btn-secondary btn-sm">
+                                                                        <i class="bi bi-eye mr-1"></i> Visualizar
+                                                                    </a>
+                                                                    <form method="post" action="{% url 'campeonato:desvincular_jogador_time' campeonato.id jogador_time.id %}" class="inline">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Desvincular {{ jogador_time.jogador.nome }}?')">
+                                                                            <i class="bi bi-x-circle mr-1"></i> Desvincular
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                {% empty %}
+                                                    <div class="text-center py-8 text-gray-500">
+                                                        <i class="bi bi-people text-4xl mb-2"></i>
+                                                        <p class="mb-3">Nenhum jogador vinculado</p>
+                                                        <button onclick="closeModal('jogadoresVinculadosModal{{ time_campeonato.id }}'); openModal('jogadoresModal{{ time_campeonato.id }}')" class="btn btn-primary">
+                                                            <i class="bi bi-plus-circle mr-2"></i> Vincular Primeiro Jogador
+                                                        </button>
+                                                    </div>
+                                                {% endfor %}
+                                                
+                                                <!-- Mensagem quando não há resultados na pesquisa -->
+                                                <div id="noResultsVinculados{{ time_campeonato.id }}" class="hidden text-center py-6 text-gray-500">
+                                                    <i class="bi bi-search text-3xl mb-2"></i>
+                                                    <p>Nenhum jogador encontrado</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Rodapé com estatísticas -->
+                                            <div class="mt-6 pt-4 border-t border-gray-200">
+                                                <div class="flex justify-between items-center text-sm text-gray-600">
+                                                    <div>
+                                                        <span class="font-medium">Total de jogadores:</span>
+                                                        <span class="ml-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                                                            {{ time_campeonato.jogadores.filter.ativo|length }}
+                                                        </span>
+                                                    </div>
+                                                    <button onclick="closeModal('jogadoresVinculadosModal{{ time_campeonato.id }}'); openModal('jogadoresModal{{ time_campeonato.id }}')" class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-plus mr-1"></i> Vincular Mais Jogadores
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal para vincular jogadores -->
+                                <div id="jogadoresModal{{ time_campeonato.id }}" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeModalOnBackdrop(event, 'jogadoresModal{{ time_campeonato.id }}')">
+                                    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                                        <div class="mt-3">
+                                            <div class="flex justify-between items-center mb-4">
+                                                <h3 class="text-lg font-medium text-gray-900">Vincular Jogadores - {{ time_campeonato.time.nome }}</h3>
+                                                <button onclick="closeModal('jogadoresModal{{ time_campeonato.id }}')" class="text-gray-400 hover:text-gray-600">
+                                                    <i class="bi bi-x-lg text-xl"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Nav tabs para jogadores -->
+                                            <div class="mb-4">
+                                                <div class="border-b border-gray-200">
+                                                    <nav class="-mb-px flex space-x-8">
+                                                        <button class="jogador-tab-button-{{ time_campeonato.id }} active border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600" onclick="showJogadorTab('existente', {{ time_campeonato.id }})">
+                                                            Vincular Existente
+                                                        </button>
+                                                        <button class="jogador-tab-button-{{ time_campeonato.id }} border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" onclick="showJogadorTab('novo', {{ time_campeonato.id }})">
+                                                            Cadastrar Novo
+                                                        </button>
+                                                    </nav>
+                                                </div>
+                                            </div>
+
+                                            <div id="jogador-tab-content-{{ time_campeonato.id }}">
+                                                <!-- Vincular jogador existente -->
+                                                <div id="existente-content-{{ time_campeonato.id }}" class="jogador-tab-content-{{ time_campeonato.id }}">
+                                                    <div class="mb-6">
+                                                        <label class="block text-sm font-medium text-gray-700 mb-3">Selecionar Jogador</label>
+                                                        
+                                                        <!-- Caixa de pesquisa -->
+                                                        <div class="mb-4">
+                                                            <div class="relative">
+                                                                <input 
+                                                                    type="text" 
+                                                                    id="searchJogador{{ time_campeonato.id }}" 
+                                                                    placeholder="Pesquisar jogador por nome, cidade ou telefone..." 
+                                                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                    oninput="filterJogadores({{ time_campeonato.id }})"
+                                                                >
+                                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <i class="bi bi-search text-gray-400"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {% with jogadores_disponiveis=time_campeonato.jogadores_disponiveis %}
+                                                            {% if jogadores_disponiveis %}
+                                                                <div id="jogadoresList{{ time_campeonato.id }}" class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+                                                                    {% for jogador in jogadores_disponiveis|slice:":20" %}
+                                                                        <div class="jogador-item-{{ time_campeonato.id }} flex items-center justify-between p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0" data-jogador-info="{{ jogador.nome|lower }} {{ jogador.cidade|lower }} {{ jogador.telefone|default_if_none:"" }}">
+                                                                            <div class="flex items-center flex-1">
+                                                                                {% if jogador.foto %}
+                                                                                    <img src="{{ jogador.foto.url }}" alt="{{ jogador.nome }}" class="h-10 w-10 rounded-full mr-3">
+                                                                                {% else %}
+                                                                                    <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-3">
+                                                                                        <i class="bi bi-person"></i>
+                                                                                    </div>
+                                                                                {% endif %}
+                                                                                <div class="flex-1">
+                                                                                    <div class="font-medium text-gray-900">{{ jogador.nome }}</div>
+                                                                                    <div class="text-sm text-gray-500">{{ jogador.cidade }}{% if jogador.telefone %} | {{ jogador.telefone }}{% endif %}</div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <form method="post" action="{% url 'campeonato:vincular_jogador_time' campeonato.id time_campeonato.id %}" class="inline">
+                                                                                {% csrf_token %}
+                                                                                <input type="hidden" name="jogador_existente" value="{{ jogador.id }}">
+                                                                                <button type="submit" class="btn btn-success btn-sm">
+                                                                                    <i class="bi bi-plus-circle mr-1"></i> Vincular
+                                                                                </button>
+                                                                            </form>
+                                                                        </div>
+                                                                    {% endfor %}
+                                                                    
+                                                                    <!-- Mensagem quando não há resultados na pesquisa -->
+                                                                    <div id="noResults{{ time_campeonato.id }}" class="hidden text-center py-6 text-gray-500">
+                                                                        <i class="bi bi-search text-3xl mb-2"></i>
+                                                                        <p>Nenhum jogador encontrado</p>
+                                                                    </div>
+                                                                </div>
+                                                            {% else %}
+                                                                <div class="text-center py-6 text-gray-500 bg-gray-50 rounded-lg">
+                                                                    <i class="bi bi-person text-4xl mb-2"></i>
+                                                                    <p class="mb-3">Sem jogadores para vincular. Adicione um novo.</p>
+                                                                    <button onclick="showJogadorTab('novo', {{ time_campeonato.id }})" class="btn btn-primary">
+                                                                        <i class="bi bi-plus-circle mr-2"></i> Cadastrar Novo
+                                                                    </button>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    </div>
+                                                </div>
+
+                                                <!-- Cadastrar novo jogador -->
+                                                <div id="novo-content-{{ time_campeonato.id }}" class="jogador-tab-content-{{ time_campeonato.id }} hidden">
+                                                    <form method="post" action="{% url 'campeonato:vincular_jogador_time' campeonato.id time_campeonato.id %}" id="formNovoJogador{{ time_campeonato.id }}">
+                                                        {% csrf_token %}
+                                                        <div class="grid grid-cols-2 gap-4 mb-4">
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                                                                <input type="text" name="nome" class="form-input" required>
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                                                                <input type="date" name="data_nascimento" class="form-input" required>
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                                                                <input type="text" name="cidade" class="form-input" required>
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                                                                <input type="text" name="telefone" class="form-input">
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+                                                                <input type="text" name="logradouro" class="form-input" required>
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                                                                <input type="text" name="bairro" class="form-input" required>
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                                                                <input type="text" name="cep" class="form-input" required>
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                                                                <input type="text" name="complemento" class="form-input">
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Título de Eleitor</label>
+                                                                <input type="text" name="titulo_eleitor" class="form-input">
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Zona Eleitoral</label>
+                                                                <input type="text" name="zona_eleitoral" class="form-input">
+                                                            </div>
+                                                            <div class="col-span-2">
+                                                                <label class="block text-sm font-medium text-gray-700 mb-1">Seção Eleitoral</label>
+                                                                <input type="text" name="secao_eleitoral" class="form-input">
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex justify-end gap-3">
+                                                            <button type="button" onclick="submitJogadorFormAndStayOpen({{ time_campeonato.id }})" class="btn btn-success">
+                                                                <i class="bi bi-plus-circle mr-1"></i> Cadastrar +
+                                                            </button>
+                                                            <button type="submit" name="action" value="cadastrar_fechar" class="btn btn-primary">
+                                                                Cadastrar e Vincular
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="mx-auto h-24 w-24 text-gray-400 flex items-center justify-center rounded-full bg-gray-100">
+                                <i class="bi bi-shield text-5xl"></i>
+                            </div>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum time vinculado</h3>
+                            <p class="mt-1 text-sm text-gray-500">Comece vinculando um time ao campeonato.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodadas & Partidas Tab -->
+        <div id="rodadas-content" class="tab-content hidden">
+            {% include 'campeonato/rodadas_melhoradas.html' %}
+        </div>
+
+        <!-- Profissionais Tab -->
+        <div id="profissionais-content" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4 flex justify-between items-center">
+                    <h2 class="font-semibold text-lg text-white">Profissionais do Campeonato</h2>
+                    {% if not campeonato_finalizado %}
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center" onclick="openModal('profissionalModal')">
+                            <i class="bi bi-plus-circle mr-2"></i> Adicionar Profissional
+                        </button>
+                    {% else %}
+                        <button class="bg-gray-400 text-white px-4 py-2 rounded-lg flex items-center cursor-not-allowed" disabled>
+                            <i class="bi bi-lock mr-2"></i> Campeonato Finalizado
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="p-6">
+                    {% if profissionais_campeonato %}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPF</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Federação</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chave PIX</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for prof_camp in profissionais_campeonato %}
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ prof_camp.profissional.nome }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prof_camp.profissional.cpf|default:"-" }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prof_camp.profissional.cidade }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ prof_camp.profissional.federacao }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {% if prof_camp.profissional.chave_pix %}
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        {{ prof_camp.profissional.get_tipo_chave_pix_display|default:"PIX" }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-gray-400">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button onclick="openEditProfissionalModal({{ prof_camp.profissional.id }}, '{{ prof_camp.profissional.nome|escapejs }}', '{{ prof_camp.profissional.cpf|default_if_none:"" }}', '{{ prof_camp.profissional.cidade|escapejs }}', '{{ prof_camp.profissional.federacao|escapejs }}', '{{ prof_camp.profissional.liga|escapejs }}', '{{ prof_camp.profissional.telefone|default_if_none:"" }}', '{{ prof_camp.profissional.chave_pix|default_if_none:"" }}', '{{ prof_camp.profissional.tipo_chave_pix|default_if_none:"" }}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <i class="bi bi-pencil"></i><span class="hidden sm:inline"> Editar</span>
+                                                </button>
+                                                <form method="post" action="{% url 'campeonato:desvincular_profissional_campeonato' campeonato.id prof_camp.id %}" class="inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Tem certeza que deseja desvincular este profissional?')">
+                                                        <i class="bi bi-trash"></i><span class="hidden sm:inline"> Excluir</span>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="mx-auto h-24 w-24 text-gray-400 flex items-center justify-center rounded-full bg-gray-100">
+                                <i class="bi bi-person-badge text-5xl"></i>
+                            </div>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum profissional vinculado</h3>
+                            <p class="mt-1 text-sm text-gray-500">Comece adicionando um profissional ao campeonato.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Vincular Time -->
+<div id="vincularTimeModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeModalOnBackdrop(event, 'vincularTimeModal')">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Vincular Time ao Campeonato</h3>
+                <button type="button" onclick="closeModal('vincularTimeModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Nav tabs para time -->
+            <div class="mb-4">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button class="time-tab-button active border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600" onclick="showTimeTab('existente')">
+                            Vincular Existente
+                        </button>
+                        <button class="time-tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" onclick="showTimeTab('novo')">
+                            Cadastrar Novo
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <div id="time-tab-content">
+                <!-- Vincular time existente -->
+                <div id="time-existente-content" class="time-tab-content">
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Selecionar Time</label>
+                        
+                        <!-- Caixa de pesquisa -->
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    id="searchTime" 
+                                    placeholder="Pesquisar time por nome..." 
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    oninput="filterTimes()"
+                                >
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="bi bi-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if times_disponiveis %}
+                            <div id="timesList" class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+                                {% for time in times_disponiveis %}
+                                    <div class="time-item flex items-center justify-between p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0" data-time-info="{{ time.nome|lower }}">
+                                        <div class="flex items-center flex-1">
+                                            {% if time.escudo %}
+                                                <img src="{{ time.escudo.url }}" alt="{{ time.nome }}" class="h-10 w-10 rounded-full mr-3">
+                                            {% else %}
+                                                <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-3">
+                                                    <i class="bi bi-shield"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="flex-1">
+                                                <div class="font-medium text-gray-900">{{ time.nome }}</div>
+                                                {% if time.cidade %}
+                                                    <div class="text-sm text-gray-500">{{ time.cidade }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <form method="post" action="{% url 'campeonato:vincular_time' campeonato.id %}" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="time_existente" value="{{ time.id }}">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="bi bi-plus-circle mr-1"></i> Vincular
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                                    
+                                    <!-- Mensagem quando não há resultados na pesquisa -->
+                                    <div id="noResultsTimes" class="hidden text-center py-6 text-gray-500">
+                                        <i class="bi bi-search text-3xl mb-2"></i>
+                                        <p>Nenhum time encontrado</p>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-6 text-gray-500 bg-gray-50 rounded-lg">
+                                    <i class="bi bi-shield text-4xl mb-2"></i>
+                                    <p class="mb-3">Sem times para vincular. Adicione um novo.</p>
+                                    <button onclick="showTimeTab('novo')" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle mr-2"></i> Cadastrar Novo
+                                    </button>
+                                </div>
+                            {% endif %}
+                    </div>
+                </div>
+
+                <!-- Cadastrar novo time -->
+                <div id="time-novo-content" class="time-tab-content hidden">
+                    <form method="post" action="{% url 'campeonato:vincular_time' campeonato.id %}" id="formNovoTime">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Nome do Time <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="nome" class="form-input" 
+                                       placeholder="Digite o nome do time" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Cidade <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="cidade" class="form-input" 
+                                       placeholder="Digite a cidade" required>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Presidente</label>
+                                <input type="text" name="presidente" class="form-input" 
+                                       placeholder="Nome do presidente (opcional)">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Campo/Estádio</label>
+                                <input type="text" name="campo_estadio" class="form-input" 
+                                       placeholder="Nome do campo ou estádio">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
+                                <input type="text" name="localizacao" class="form-input" 
+                                       placeholder="Endereço ou localização do campo">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-blue-800 text-sm">
+                                <i class="bi bi-info-circle mr-1"></i>
+                                <span class="text-red-500">*</span> Campos obrigatórios
+                            </p>
+                        </div>
+                        
+                        <div class="flex justify-end gap-3">
+                            <button type="button" onclick="submitTimeFormAndStayOpen()" class="btn btn-success">
+                                <i class="bi bi-plus-circle mr-1"></i> Cadastrar +
+                            </button>
+                            <button type="submit" name="action" value="cadastrar_fechar" class="btn btn-primary">
+                                Cadastrar e Vincular
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Profissional -->
+<div id="profissionalModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeModalOnBackdrop(event, 'profissionalModal')">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Adicionar Profissional</h3>
+                <button type="button" onclick="closeModal('profissionalModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Nav tabs para profissional -->
+            <div class="mb-4">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button class="prof-tab-button active border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600" onclick="showProfTab('existente')">
+                            Vincular Existente
+                        </button>
+                        <button class="prof-tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" onclick="showProfTab('novo')">
+                            Cadastrar Novo
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <div id="prof-tab-content">
+                <!-- Vincular profissional existente -->
+                <div id="existente-content" class="prof-tab-content">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Selecionar Profissional</label>
+                        {% with profissionais_disponiveis=campeonato.tenant.profissionais.all %}
+                            {% if profissionais_disponiveis %}
+                                {% with tem_disponiveis=False %}
+                                    <div class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+                                        {% for profissional in profissionais_disponiveis %}
+                                            {% if profissional.id not in profissionais_vinculados_ids %}
+                                                <div class="flex items-center justify-between p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium text-gray-900">{{ profissional.nome }}</div>
+                                                        <div class="text-sm text-gray-500">
+                                                            {{ profissional.federacao }} - {{ profissional.cidade }}
+                                                            {% if profissional.cpf %} | CPF: {{ profissional.cpf }}{% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <form method="post" action="{% url 'campeonato:vincular_profissional_campeonato' campeonato.id %}" class="inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="profissional_existente" value="{{ profissional.id }}">
+                                                        <button type="submit" class="btn btn-success btn-sm">
+                                                            <i class="bi bi-plus-circle mr-1"></i> Vincular
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <!-- Se não há profissionais disponíveis para vincular -->
+                                    {% if not profissionais_disponiveis or profissionais_vinculados_ids|length == profissionais_disponiveis|length %}
+                                        <div class="text-center py-6 text-gray-500 bg-gray-50 rounded-lg mt-4">
+                                            <i class="bi bi-person-badge text-4xl mb-2"></i>
+                                            <p class="mb-3">Sem profissionais para vincular. Adicione um novo.</p>
+                                            <button onclick="showProfTab('novo')" class="btn btn-primary">
+                                                <i class="bi bi-plus-circle mr-2"></i> Cadastrar Novo
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <div class="text-center py-6 text-gray-500 bg-gray-50 rounded-lg">
+                                    <i class="bi bi-person-badge text-4xl mb-2"></i>
+                                    <p class="mb-3">Sem profissionais para vincular. Adicione um novo.</p>
+                                    <button onclick="showProfTab('novo')" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle mr-2"></i> Cadastrar Novo
+                                    </button>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+
+                <!-- Cadastrar novo profissional -->
+                <div id="novo-content" class="prof-tab-content hidden">
+                    <form method="post" action="{% url 'campeonato:vincular_profissional_campeonato' campeonato.id %}" id="formNovoProfissional">
+                        {% csrf_token %}
+                        
+                        <!-- Exibir erros de validação -->
+                        {% if profissional_form.errors %}
+                            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <h4 class="text-red-800 font-medium mb-2">Erros de validação:</h4>
+                                <ul class="text-red-600 text-sm space-y-1">
+                                    {% for field, errors in profissional_form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ field|capfirst }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Nome <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="nome" id="id_nome" class="form-input" 
+                                       placeholder="Digite o nome completo" required>
+                                {% if profissional_form.nome.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.nome.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                                <input type="text" name="cpf" id="id_cpf" class="form-input" 
+                                       placeholder="Somente números - 11 dígitos" maxlength="11" 
+                                       oninput="this.value = this.value.replace(/\D/g, '').substring(0, 11)">
+                                {% if profissional_form.cpf.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.cpf.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Cidade <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="cidade" id="id_cidade" class="form-input" 
+                                       placeholder="Digite a cidade" required>
+                                {% if profissional_form.cidade.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.cidade.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                                <input type="text" 
+                                       name="telefone" 
+                                       id="id_telefone" 
+                                       class="form-input" 
+                                       placeholder="(11) 99999-9999"
+                                       maxlength="15"
+                                       oninput="formatTelefone(this)">
+                                {% if profissional_form.telefone.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.telefone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Federação <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="federacao" id="id_federacao" class="form-input" 
+                                       placeholder="Ex: FPF, CBF, etc." required>
+                                {% if profissional_form.federacao.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.federacao.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Liga <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="liga" id="id_liga" class="form-input" 
+                                       placeholder="Digite a liga" required>
+                                {% if profissional_form.liga.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.liga.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Chave PIX</label>
+                                <select name="tipo_chave_pix" id="id_tipo_chave_pix" class="form-input">
+                                    <option value="">---------</option>
+                                    <option value="EMAIL">E-mail</option>
+                                    <option value="TELEFONE">Telefone</option>
+                                    <option value="CPF">CPF</option>
+                                    <option value="ALEATORIA">Aleatória</option>
+                                    <option value="OUTRA">Outra</option>
+                                </select>
+                                {% if profissional_form.tipo_chave_pix.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.tipo_chave_pix.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Chave PIX</label>
+                                <input type="text" name="chave_pix" id="id_chave_pix" class="form-input" 
+                                       placeholder="Digite a chave PIX">
+                                {% if profissional_form.chave_pix.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ profissional_form.chave_pix.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-blue-800 text-sm">
+                                <i class="bi bi-info-circle mr-1"></i>
+                                <span class="text-red-500">*</span> Campos obrigatórios
+                            </p>
+                        </div>
+                        
+                        <div class="flex justify-end gap-3">
+                            <button type="button" onclick="submitFormAndStayOpen()" class="btn btn-success">
+                                <i class="bi bi-plus-circle mr-1"></i> Cadastrar +
+                            </button>
+                            <button type="submit" name="action" value="cadastrar_fechar" class="btn btn-primary">
+                                Cadastrar e Vincular
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Profissional -->
+<div id="editProfissionalModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeModalOnBackdrop(event, 'editProfissionalModal')">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Editar Profissional</h3>
+                <button type="button" onclick="closeModal('editProfissionalModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            
+            <form method="post" action="{% url 'campeonato:editar_profissional_campeonato' campeonato.id %}" id="formEditProfissional">
+                {% csrf_token %}
+                <input type="hidden" name="profissional_id" id="edit_profissional_id">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text" name="nome" id="edit_nome" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                        <input type="text" name="cpf" id="edit_cpf" class="form-input" placeholder="Somente números - 11 dígitos" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').substring(0, 11)">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                        <input type="text" name="cidade" id="edit_cidade" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="text" name="telefone" id="edit_telefone" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Federação</label>
+                        <input type="text" name="federacao" id="edit_federacao" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Liga</label>
+                        <input type="text" name="liga" id="edit_liga" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Chave PIX</label>
+                        <select name="tipo_chave_pix" id="edit_tipo_chave_pix" class="form-input">
+                            <option value="">---------</option>
+                            <option value="EMAIL">E-mail</option>
+                            <option value="TELEFONE">Telefone</option>
+                            <option value="CPF">CPF</option>
+                            <option value="ALEATORIA">Aleatória</option>
+                            <option value="OUTRA">Outra</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Chave PIX</label>
+                        <input type="text" name="chave_pix" id="edit_chave_pix" class="form-input">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('editProfissionalModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% for time_campeonato in times_campeonato %}
+    <!-- Modal Editar TimeCampeonato -->
+    <div id="editarTimeCampeonatoModal{{ time_campeonato.id }}" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-30 overflow-y-auto h-full w-full z-50" onclick="closeModalOnBackdrop(event, 'editarTimeCampeonatoModal{{ time_campeonato.id }}')">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Editar Informações do Time</h3>
+                <button onclick="closeModal('editarTimeCampeonatoModal{{ time_campeonato.id }}')" class="text-gray-400 hover:text-gray-600">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+            <form method="post" action="{% url 'campeonato:editar_time_campeonato' campeonato.id time_campeonato.id %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
+                    <input type="text" name="localizacao" class="form-input w-full" value="{{ time_campeonato.localizacao }}" placeholder="Endereço ou localização do campo">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Campo/Estádio</label>
+                    <input type="text" name="campo_estadio" class="form-input w-full" value="{{ time_campeonato.campo_estadio }}" placeholder="Nome do campo ou estádio">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Presidente</label>
+                    <input type="text" name="presidente" class="form-input w-full" value="{{ time_campeonato.presidente }}" placeholder="Nome do presidente">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('editarTimeCampeonatoModal{{ time_campeonato.id }}')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Esconder loading e mostrar conteúdo quando página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const mainContent = document.getElementById('main-content');
+        
+        setTimeout(() => {
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 300);
+            }
+            if (mainContent) {
+                mainContent.classList.remove('opacity-0');
+                mainContent.classList.add('opacity-100');
+            }
+        }, 500);
+    });
+
+    // Função para mostrar tabs principais
+    function showTab(tabName) {
+        // Esconder todos os conteúdos
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remover classe active de todos os botões
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active', 'border-blue-500', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Mostrar o conteúdo selecionado
+        document.getElementById(tabName + '-content').classList.remove('hidden');
+        
+        // Ativar o botão selecionado
+        const activeButton = document.getElementById(tabName + '-tab');
+        activeButton.classList.add('active', 'border-blue-500', 'text-blue-600');
+        activeButton.classList.remove('border-transparent', 'text-gray-500');
+    }
+
+    // Função para mostrar tabs de profissional
+    function showProfTab(tabName) {
+        // Esconder todos os conteúdos
+        document.querySelectorAll('.prof-tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remover classe active de todos os botões
+        document.querySelectorAll('.prof-tab-button').forEach(button => {
+            button.classList.remove('active', 'border-blue-500', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Mostrar o conteúdo selecionado
+        document.getElementById(tabName + '-content').classList.remove('hidden');
+        
+        // Ativar o botão correspondente na aba
+        const buttons = document.querySelectorAll('.prof-tab-button');
+        if (tabName === 'existente') {
+            buttons[0].classList.add('active', 'border-blue-500', 'text-blue-600');
+            buttons[0].classList.remove('border-transparent', 'text-gray-500');
+        } else if (tabName === 'novo') {
+            buttons[1].classList.add('active', 'border-blue-500', 'text-blue-600');
+            buttons[1].classList.remove('border-transparent', 'text-gray-500');
+        }
+    }
+
+    // Funções para modal
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Função para carregamento lazy de modais
+    function loadAndOpenModal(modalId, button) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            // Mostrar indicador de carregamento no botão
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-1"></i> Carregando...';
+            button.disabled = true;
+            
+            // Simular carregamento (aqui você pode fazer uma requisição AJAX se necessário)
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                openModal(modalId);
+            }, 300);
+        }
+    }
+
+    // Fechar modal ao clicar fora - versão melhorada
+    function closeModalOnBackdrop(event, modalId) {
+        if (event.target === event.currentTarget) {
+            closeModal(modalId);
+        }
+    }
+
+    // Manter compatibilidade com método antigo
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            // Identificar qual modal foi clicado
+            const modalId = event.target.id;
+            if (modalId) {
+                closeModal(modalId);
+            }
+        }
+    }
+
+    // Verificar se deve abrir o modal automaticamente
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('modal') === 'open') {
+            openModal('profissionalModal');
+            if (urlParams.get('tab') === 'novo') {
+                showProfTab('novo');
+            }
+            // Limpar os parâmetros da URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    });
+
+    // Função para submeter formulário e manter modal aberto
+    function submitFormAndStayOpen() {
+        const form = document.getElementById('formNovoProfissional');
+        
+        // Validar campos obrigatórios antes de submeter
+        if (!validateProfissionalForm()) {
+            return;
+        }
+        
+        const formData = new FormData(form);
+        formData.append('action', 'cadastrar_continuar');
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.text())
+        .then(() => {
+            // Limpar formulário
+            form.reset();
+            // Recarregar a página para mostrar o novo profissional
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            // Em caso de erro, submeter normalmente
+            form.submit();
+        });
+    }
+
+    // Função para formatar telefone
+    function formatTelefone(input) {
+        let value = input.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+        
+        if (value.length <= 11) {
+            if (value.length <= 2) {
+                value = value.replace(/(\d{0,2})/, '($1');
+            } else if (value.length <= 6) {
+                value = value.replace(/(\d{2})(\d{0,4})/, '($1) $2');
+            } else if (value.length <= 10) {
+                value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            }
+        }
+        
+        input.value = value;
+    }
+
+    // Função para validar formulário de profissional
+    function validateProfissionalForm() {
+        const form = document.getElementById('formNovoProfissional');
+        const requiredFields = [
+            { name: 'nome', label: 'Nome' },
+            { name: 'cidade', label: 'Cidade' },
+            { name: 'federacao', label: 'Federação' },
+            { name: 'liga', label: 'Liga' }
+        ];
+        
+        let isValid = true;
+        let errorMessage = '';
+        
+        // Limpar erros anteriores
+        document.querySelectorAll('.field-error').forEach(el => el.remove());
+        document.querySelectorAll('.border-red-500').forEach(el => {
+            el.classList.remove('border-red-500');
+            el.classList.add('border-gray-300');
+        });
+        
+        for (const field of requiredFields) {
+            const input = form.querySelector(`[name="${field.name}"]`);
+            const value = input.value.trim();
+            
+            if (!value) {
+                isValid = false;
+                errorMessage += `${field.label} é obrigatório.\n`;
+                
+                // Adicionar estilo de erro
+                input.classList.add('border-red-500');
+                input.classList.remove('border-gray-300');
+                
+                // Adicionar mensagem de erro
+                const errorDiv = document.createElement('p');
+                errorDiv.className = 'text-red-500 text-xs mt-1 field-error';
+                errorDiv.textContent = `${field.label} é obrigatório.`;
+                input.parentNode.appendChild(errorDiv);
+            }
+        }
+        
+        // Validar CPF se preenchido
+        const cpfInput = form.querySelector('[name="cpf"]');
+        const cpfValue = cpfInput.value.trim();
+        if (cpfValue && cpfValue.length !== 11) {
+            isValid = false;
+            cpfInput.classList.add('border-red-500');
+            cpfInput.classList.remove('border-gray-300');
+            
+            const errorDiv = document.createElement('p');
+            errorDiv.className = 'text-red-500 text-xs mt-1 field-error';
+            errorDiv.textContent = 'CPF deve ter 11 dígitos.';
+            cpfInput.parentNode.appendChild(errorDiv);
+        }
+        
+        if (!isValid) {
+            // Focar no primeiro campo com erro
+            const firstError = form.querySelector('.border-red-500');
+            if (firstError) {
+                firstError.focus();
+            }
+        }
+        
+        return isValid;
+    }
+
+    // Adicionar event listener para validação em tempo real
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('formNovoProfissional');
+        if (form) {
+            // Adicionar validação no submit
+            form.addEventListener('submit', function(e) {
+                if (!validateProfissionalForm()) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Limpar erros quando o usuário digita
+            const inputs = form.querySelectorAll('input[required]');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        this.classList.remove('border-red-500');
+                        this.classList.add('border-gray-300');
+                        const errorMsg = this.parentNode.querySelector('.field-error');
+                        if (errorMsg) {
+                            errorMsg.remove();
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Adicionar validação para formulário de times
+        const timeForm = document.getElementById('formNovoTime');
+        if (timeForm) {
+            // Adicionar validação no submit
+            timeForm.addEventListener('submit', function(e) {
+                if (!validateTimeForm()) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Limpar erros quando o usuário digita
+            const timeInputs = timeForm.querySelectorAll('input[required]');
+            timeInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        this.classList.remove('border-red-500');
+                        this.classList.add('border-gray-300');
+                        const errorMsg = this.parentNode.querySelector('.time-field-error');
+                        if (errorMsg) {
+                            errorMsg.remove();
+                        }
+                    }
+                });
+            });
+        }
+    });
+
+    // Função para abrir modal de edição
+    function openEditProfissionalModal(id, nome, cpf, cidade, federacao, liga, telefone, chave_pix, tipo_chave_pix) {
+        document.getElementById('edit_profissional_id').value = id;
+        document.getElementById('edit_nome').value = nome;
+        document.getElementById('edit_cpf').value = cpf;
+        document.getElementById('edit_cidade').value = cidade;
+        document.getElementById('edit_federacao').value = federacao;
+        document.getElementById('edit_liga').value = liga;
+        document.getElementById('edit_telefone').value = telefone;
+        document.getElementById('edit_chave_pix').value = chave_pix;
+        document.getElementById('edit_tipo_chave_pix').value = tipo_chave_pix;
+        
+        openModal('editProfissionalModal');
+    }
+
+    // Função para mostrar tabs de jogadores
+    function showJogadorTab(tabName, timeCampeonatoId) {
+        // Esconder todos os conteúdos
+        document.querySelectorAll('.jogador-tab-content-' + timeCampeonatoId).forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remover classe active de todos os botões
+        document.querySelectorAll('.jogador-tab-button-' + timeCampeonatoId).forEach(button => {
+            button.classList.remove('active', 'border-blue-500', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Mostrar o conteúdo selecionado
+        document.getElementById(tabName + '-content-' + timeCampeonatoId).classList.remove('hidden');
+        
+        // Ativar o botão correspondente na aba
+        const buttons = document.querySelectorAll('.jogador-tab-button-' + timeCampeonatoId);
+        if (tabName === 'existente') {
+            buttons[0].classList.add('active', 'border-blue-500', 'text-blue-600');
+            buttons[0].classList.remove('border-transparent', 'text-gray-500');
+        } else if (tabName === 'novo') {
+            buttons[1].classList.add('active', 'border-blue-500', 'text-blue-600');
+            buttons[1].classList.remove('border-transparent', 'text-gray-500');
+        }
+    }
+
+    // Função para submeter formulário de jogador e manter modal aberto
+    function submitJogadorFormAndStayOpen(timeCampeonatoId) {
+        const form = document.getElementById('formNovoJogador' + timeCampeonatoId);
+        const formData = new FormData(form);
+        formData.append('action', 'cadastrar_continuar');
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.text())
+        .then(() => {
+            // Limpar formulário
+            form.reset();
+            // Recarregar a página para mostrar o novo jogador
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            // Em caso de erro, submeter normalmente
+            form.submit();
+        });
+    }
+
+    // Função para abrir modal de edição de jogador
+    // Função para filtrar jogadores
+    function filterJogadores(timeCampeonatoId) {
+        const searchInput = document.getElementById('searchJogador' + timeCampeonatoId);
+        const searchTerm = searchInput.value.toLowerCase();
+        const jogadorItems = document.querySelectorAll('.jogador-item-' + timeCampeonatoId);
+        const noResults = document.getElementById('noResults' + timeCampeonatoId);
+        
+        let hasVisibleItems = false;
+        
+        jogadorItems.forEach(item => {
+            const jogadorInfo = item.getAttribute('data-jogador-info');
+            
+            if (jogadorInfo.includes(searchTerm)) {
+                item.style.display = 'flex';
+                hasVisibleItems = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Mostrar/esconder mensagem de "nenhum resultado"
+        if (searchTerm && !hasVisibleItems) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    // Função para filtrar jogadores vinculados
+    function filterJogadoresVinculados(timeCampeonatoId) {
+        const searchInput = document.getElementById('searchJogadorVinculado' + timeCampeonatoId);
+        const searchTerm = searchInput.value.toLowerCase();
+        const jogadorItems = document.querySelectorAll('.jogador-vinculado-item-' + timeCampeonatoId);
+        const noResults = document.getElementById('noResultsVinculados' + timeCampeonatoId);
+        
+        let hasVisibleItems = false;
+        
+        jogadorItems.forEach(item => {
+            const jogadorInfo = item.getAttribute('data-jogador-vinculado-info');
+            
+            if (jogadorInfo.includes(searchTerm)) {
+                item.style.display = 'block';
+                hasVisibleItems = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Mostrar/esconder mensagem de "nenhum resultado"
+        if (searchTerm && !hasVisibleItems) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    // Função para mostrar tabs de time
+    function showTimeTab(tabName) {
+        // Esconder todos os conteúdos
+        document.querySelectorAll('.time-tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remover classe active de todos os botões
+        document.querySelectorAll('.time-tab-button').forEach(button => {
+            button.classList.remove('active', 'border-blue-500', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Mostrar o conteúdo selecionado
+        document.getElementById('time-' + tabName + '-content').classList.remove('hidden');
+        
+        // Ativar o botão correspondente na aba
+        const buttons = document.querySelectorAll('.time-tab-button');
+        if (tabName === 'existente') {
+            buttons[0].classList.add('active', 'border-blue-500', 'text-blue-600');
+            buttons[0].classList.remove('border-transparent', 'text-gray-500');
+        } else if (tabName === 'novo') {
+            buttons[1].classList.add('active', 'border-blue-500', 'text-blue-600');
+            buttons[1].classList.remove('border-transparent', 'text-gray-500');
+        }
+    }
+
+    // Função para filtrar times
+    function filterTimes() {
+        const searchInput = document.getElementById('searchTime');
+        const searchTerm = searchInput.value.toLowerCase();
+        const timeItems = document.querySelectorAll('.time-item');
+        const noResults = document.getElementById('noResultsTimes');
+        
+        let hasVisibleItems = false;
+        
+        timeItems.forEach(item => {
+            const timeInfo = item.getAttribute('data-time-info');
+            
+            if (timeInfo.includes(searchTerm)) {
+                item.style.display = 'flex';
+                hasVisibleItems = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Mostrar/esconder mensagem de "nenhum resultado"
+        if (searchTerm && !hasVisibleItems) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    // Função para submeter formulário de time e manter modal aberto
+    function submitTimeFormAndStayOpen() {
+        const form = document.getElementById('formNovoTime');
+        
+        // Validar campos obrigatórios antes de submeter
+        if (!validateTimeForm()) {
+            return;
+        }
+        
+        const formData = new FormData(form);
+        formData.append('action', 'cadastrar_continuar');
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.text())
+        .then(() => {
+            // Limpar formulário
+            form.reset();
+            // Recarregar a página para mostrar o novo time
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            // Em caso de erro, submeter normalmente
+            form.submit();
+        });
+    }
+
+    // Função para validar formulário de time
+    function validateTimeForm() {
+        const form = document.getElementById('formNovoTime');
+        const requiredFields = [
+            { name: 'nome', label: 'Nome do Time' },
+            { name: 'cidade', label: 'Cidade' }
+        ];
+        
+        let isValid = true;
+        
+        // Limpar erros anteriores
+        document.querySelectorAll('.time-field-error').forEach(el => el.remove());
+        form.querySelectorAll('.border-red-500').forEach(el => {
+            el.classList.remove('border-red-500');
+            el.classList.add('border-gray-300');
+        });
+        
+        for (const field of requiredFields) {
+            const input = form.querySelector(`[name="${field.name}"]`);
+            const value = input.value.trim();
+            
+            if (!value) {
+                isValid = false;
+                
+                // Adicionar estilo de erro
+                input.classList.add('border-red-500');
+                input.classList.remove('border-gray-300');
+                
+                // Adicionar mensagem de erro
+                const errorDiv = document.createElement('p');
+                errorDiv.className = 'text-red-500 text-xs mt-1 time-field-error';
+                errorDiv.textContent = `${field.label} é obrigatório.`;
+                input.parentNode.appendChild(errorDiv);
+            }
+        }
+        
+        if (!isValid) {
+            // Focar no primeiro campo com erro
+            const firstError = form.querySelector('.border-red-500');
+            if (firstError) {
+                firstError.focus();
+            }
+        }
+        
+        return isValid;
+    }
+
+    // Funções para gerenciar rodadas e partidas
+    function gerarRodadas() {
+        const campeonatoId = {{ campeonato.id }};
+        const temPartidasFinalizadas = {{ tem_partidas_finalizadas|yesno:"true,false" }};
+        const campeonatoFinalizado = {{ campeonato_finalizado|yesno:"true,false" }};
+        
+        // Verificar se campeonato está finalizado
+        if (campeonatoFinalizado) {
+            alert('Não é possível gerar/regenerar rodadas em um campeonato finalizado.');
+            return;
+        }
+        
+        // Verificar se há partidas finalizadas
+        if (temPartidasFinalizadas) {
+            alert('Não é possível regenerar rodadas quando há partidas finalizadas no campeonato.');
+            return;
+        }
+        
+        if (confirm('Isso irá gerar ou regenerar todas as rodadas e partidas. Continuar?')) {
+            // Buscar token CSRF de forma mais robusta
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.querySelector('meta[name=csrf-token]')?.content ||
+                             getCookie('csrftoken');
+            
+            if (!csrfToken) {
+                alert('Erro: Token CSRF não encontrado. Recarregue a página e tente novamente.');
+                return;
+            }
+            
+            fetch(`/painel/campeonatos/${campeonatoId}/gerar-rodadas/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta da view:', data);
+                if (data.success) {
+                    alert(data.message || 'Rodadas geradas com sucesso!');
+                    setTimeout(() => location.reload(), 1500);
+                } else if (data.error) {
+                    alert('Erro: ' + data.error);
+                } else {
+                    alert('Rodadas geradas com sucesso!');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao gerar rodadas:', error);
+                alert('Erro ao gerar rodadas: ' + error.message);
+            });
+        }
+    }
+    
+    // Função auxiliar para buscar cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock extra_js %}
+
+<!-- Incluir modais das rodadas -->
+{% include 'campeonato/rodadas_modals.html' %}

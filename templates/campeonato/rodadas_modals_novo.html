@@ -1,0 +1,377 @@
+{% load i18n %}
+
+<!-- Modal para editar rodada -->
+<div class="modal fade" id="editarRodadaModal" tabindex="-1" aria-labelledby="editarRodadaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-2xl">
+            <div class="modal-header bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-0">
+                <h5 class="modal-title d-flex align-items-center" id="editarRodadaModalLabel">
+                    <i class="bi bi-calendar-event text-2xl mr-3"></i>
+                    {% trans "Edit Round" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-6">
+                <form id="editarRodadaForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="rodadaId" name="rodada_id">
+                    
+                    <div class="mb-4">
+                        <label for="rodadaNome" class="form-label fw-medium text-gray-700">
+                            <i class="bi bi-tag mr-2"></i>{% trans "Round Name" %}
+                        </label>
+                        <input type="text" class="form-control form-control-lg border-2" id="rodadaNome" name="nome" placeholder="Ex: Round 1, Semifinal, Final">
+                        <div class="form-text text-muted">{% trans "Leave empty to use automatic naming" %}</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="rodadaData" class="form-label fw-medium text-gray-700">
+                            <i class="bi bi-calendar3 mr-2"></i>{% trans "Date" %}
+                        </label>
+                        <input type="date" class="form-control form-control-lg border-2" id="rodadaData" name="data">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="rodadaObservacoes" class="form-label fw-medium text-gray-700">
+                            <i class="bi bi-chat-text mr-2"></i>{% trans "Notes" %}
+                        </label>
+                        <textarea class="form-control border-2" id="rodadaObservacoes" name="observacoes" rows="4" placeholder="{% trans 'Additional information about this round...' %}"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 p-6 pt-0">
+                <button type="button" class="btn btn-light btn-lg px-5" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg mr-2"></i>{% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-primary btn-lg px-5" onclick="salvarRodada()">
+                    <i class="bi bi-check-lg mr-2"></i>{% trans "Save Changes" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para gerenciar partida (NOVO DESIGN) -->
+<div class="modal fade" id="gerenciarPartidaModal" tabindex="-1" aria-labelledby="gerenciarPartidaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-2xl">
+            <!-- Header do Modal -->
+            <div class="modal-header bg-gradient-to-r from-green-600 to-emerald-700 text-white border-0 p-6">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white/20 p-3 rounded-xl mr-4">
+                        <i class="bi bi-joystick text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="modal-title mb-1" id="gerenciarPartidaModalLabel">
+                            {% trans "Manage Match" %}
+                        </h4>
+                        <p class="mb-0 text-green-100" id="partidaInfo">
+                            {% trans "Edit match details, score and status" %}
+                        </p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Corpo do Modal -->
+            <div class="modal-body p-0">
+                <form id="gerenciarPartidaForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="partidaId" name="partida_id">
+                    
+                    <!-- Seção dos Times -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 d-flex align-items-center">
+                            <i class="bi bi-people mr-3 text-blue-600"></i>
+                            {% trans "Teams" %}
+                        </h5>
+                        
+                        <div class="row align-items-center">
+                            <!-- Time Mandante -->
+                            <div class="col-md-5">
+                                <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                                    <div class="d-flex align-items-center">
+                                        <div id="escudoMandante" class="me-3">
+                                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-shield text-white text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div id="nomeMandante" class="fw-bold text-lg text-gray-900">{% trans "Home Team" %}</div>
+                                            <div class="text-sm text-gray-500">{% trans "Home" %}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- VS -->
+                            <div class="col-md-2 text-center">
+                                <div class="bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-3 border border-gray-300">
+                                    <span class="text-2xl font-bold text-gray-600">VS</span>
+                                </div>
+                            </div>
+
+                            <!-- Time Visitante -->
+                            <div class="col-md-5">
+                                <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-1 text-end me-3">
+                                            <div id="nomeVisitante" class="fw-bold text-lg text-gray-900">{% trans "Away Team" %}</div>
+                                            <div class="text-sm text-gray-500">{% trans "Away" %}</div>
+                                        </div>
+                                        <div id="escudoVisitante">
+                                            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-shield text-white text-xl"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção do Placar -->
+                    <div class="p-6 border-b">
+                        <h5 class="text-lg font-bold text-gray-900 mb-4 d-flex align-items-center">
+                            <i class="bi bi-calculator mr-3 text-green-600"></i>
+                            {% trans "Score" %}
+                        </h5>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border border-gray-200">
+                                    <div class="row align-items-center">
+                                        <!-- Placar Mandante -->
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-medium text-gray-700 text-center d-block">
+                                                <span id="labelMandante">{% trans "Home Goals" %}</span>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control form-control-lg text-center border-2 fw-bold" 
+                                                   id="placarMandante" 
+                                                   name="placar_mandante" 
+                                                   min="0" 
+                                                   max="99"
+                                                   style="font-size: 2rem;">
+                                        </div>
+
+                                        <!-- Separador -->
+                                        <div class="col-md-4 text-center">
+                                            <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                                                <i class="bi bi-circle text-3xl text-gray-400"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Placar Visitante -->
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-medium text-gray-700 text-center d-block">
+                                                <span id="labelVisitante">{% trans "Away Goals" %}</span>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control form-control-lg text-center border-2 fw-bold" 
+                                                   id="placarVisitante" 
+                                                   name="placar_visitante" 
+                                                   min="0" 
+                                                   max="99"
+                                                   style="font-size: 2rem;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção do Status e Detalhes -->
+                    <div class="p-6">
+                        <div class="row">
+                            <!-- Status da Partida -->
+                            <div class="col-md-6 mb-4">
+                                <h5 class="text-lg font-bold text-gray-900 mb-3 d-flex align-items-center">
+                                    <i class="bi bi-flag mr-3 text-purple-600"></i>
+                                    {% trans "Match Status" %}
+                                </h5>
+                                <select class="form-select form-select-lg border-2" id="statusPartida" name="status">
+                                    <option value="nao_iniciada">
+                                        <i class="bi bi-clock"></i> {% trans "Not Started" %}
+                                    </option>
+                                    <option value="em_andamento">
+                                        <i class="bi bi-play-circle"></i> {% trans "In Progress" %}
+                                    </option>
+                                    <option value="finalizada">
+                                        <i class="bi bi-check-circle"></i> {% trans "Finished" %}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Data e Hora -->
+                            <div class="col-md-6 mb-4">
+                                <h5 class="text-lg font-bold text-gray-900 mb-3 d-flex align-items-center">
+                                    <i class="bi bi-calendar3 mr-3 text-orange-600"></i>
+                                    {% trans "Date & Time" %}
+                                </h5>
+                                <div class="row">
+                                    <div class="col-7">
+                                        <input type="date" 
+                                               class="form-control form-control-lg border-2" 
+                                               id="dataPartida" 
+                                               name="data">
+                                    </div>
+                                    <div class="col-5">
+                                        <input type="time" 
+                                               class="form-control form-control-lg border-2" 
+                                               id="horaPartida" 
+                                               name="hora">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="mb-4">
+                            <h5 class="text-lg font-bold text-gray-900 mb-3 d-flex align-items-center">
+                                <i class="bi bi-chat-text mr-3 text-indigo-600"></i>
+                                {% trans "Match Notes" %}
+                            </h5>
+                            <textarea class="form-control border-2" 
+                                      id="observacoesPartida" 
+                                      name="observacoes" 
+                                      rows="4" 
+                                      placeholder="{% trans 'Add notes about the match, events, substitutions, etc...' %}"></textarea>
+                        </div>
+
+                        <!-- Estatísticas Rápidas (Opcional) -->
+                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 border border-gray-200">
+                            <h6 class="font-bold text-gray-900 mb-3 d-flex align-items-center">
+                                <i class="bi bi-bar-chart mr-2 text-blue-600"></i>
+                                {% trans "Quick Stats" %} <small class="text-gray-500 ml-2">({% trans "Optional" %})</small>
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label text-sm">{% trans "Yellow Cards - Home" %}</label>
+                                    <input type="number" class="form-control" id="cartoesAmarelosMandante" name="cartoes_amarelos_mandante" min="0" max="11" value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-sm">{% trans "Red Cards - Home" %}</label>
+                                    <input type="number" class="form-control" id="cartoesVermelhosMandante" name="cartoes_vermelhos_mandante" min="0" max="11" value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-sm">{% trans "Yellow Cards - Away" %}</label>
+                                    <input type="number" class="form-control" id="cartoesAmarelosVisitante" name="cartoes_amarelos_visitante" min="0" max="11" value="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-sm">{% trans "Red Cards - Away" %}</label>
+                                    <input type="number" class="form-control" id="cartoesVermelhosVisitante" name="cartoes_vermelhos_visitante" min="0" max="11" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer do Modal -->
+            <div class="modal-footer border-0 p-6 pt-0">
+                <button type="button" class="btn btn-light btn-lg px-6" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg mr-2"></i>{% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-warning btn-lg px-6 me-2" onclick="resetarPartida()">
+                    <i class="bi bi-arrow-counterclockwise mr-2"></i>{% trans "Reset" %}
+                </button>
+                <button type="button" class="btn btn-success btn-lg px-6" onclick="salvarPartida()">
+                    <i class="bi bi-check-lg mr-2"></i>{% trans "Save Match" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="sucessoToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong class="me-auto">{% trans "Success" %}</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="sucessoMessage">
+            {% trans "Changes saved successfully!" %}
+        </div>
+    </div>
+
+    <div id="erroToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong class="me-auto">{% trans "Error" %}</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="erroMessage">
+            {% trans "An error occurred. Please try again." %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos customizados para o modal */
+.modal-xl {
+    max-width: 1200px;
+}
+
+.text-xl {
+    font-size: 1.25rem !important;
+}
+
+.text-2xl {
+    font-size: 1.5rem !important;
+}
+
+.text-3xl {
+    font-size: 1.875rem !important;
+}
+
+.text-lg {
+    font-size: 1.125rem !important;
+}
+
+.text-sm {
+    font-size: 0.875rem !important;
+}
+
+.border-2 {
+    border-width: 2px !important;
+}
+
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+.fw-medium {
+    font-weight: 500 !important;
+}
+
+/* Gradientes personalizados */
+.bg-gradient-to-r {
+    background: linear-gradient(to right, var(--bs-primary), var(--bs-info));
+}
+
+.from-blue-50 {
+    --tw-gradient-from: #eff6ff;
+}
+
+.to-green-50 {
+    --tw-gradient-to: #f0fdf4;
+}
+
+/* Hover effects */
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Toast animations */
+.toast {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+</style>

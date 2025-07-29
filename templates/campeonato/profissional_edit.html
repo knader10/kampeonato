@@ -1,0 +1,137 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}{{ title }} - Kampeonato{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center">
+            {% if campeonato_id %}
+                <a href="{% url 'campeonato:campeonato_gerenciar' campeonato_id %}" class="text-blue-600 hover:text-blue-800 mr-4">
+                    <i class="bi bi-arrow-left text-2xl text-blue-700 font-bold drop-shadow-sm transition-all duration-200 hover:text-blue-900 hover:scale-110"></i>
+                </a>
+            {% else %}
+                <a href="{% url 'campeonato:profissionais_list' %}" class="text-blue-600 hover:text-blue-800 mr-4">
+                    <i class="bi bi-arrow-left text-2xl text-blue-700 font-bold drop-shadow-sm transition-all duration-200 hover:text-blue-900 hover:scale-110"></i>
+                </a>
+            {% endif %}
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+                <p class="text-gray-600 mt-1">Editar informações do profissional</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible mb-6" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulário -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                <i class="bi bi-person-badge text-blue-600 mr-2"></i>
+                Informações do Profissional
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.nome.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nome Completo *
+                        </label>
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.nome.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.cidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Cidade
+                        </label>
+                        {{ form.cidade }}
+                        {% if form.cidade.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.cidade.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.telefone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Telefone
+                        </label>
+                        {{ form.telefone }}
+                        {% if form.telefone.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.telefone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label for="{{ form.foto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Foto do Profissional
+                    </label>
+                    {% if profissional.foto %}
+                        <div class="mb-3">
+                            <img src="{{ profissional.foto.url }}" alt="Foto atual" class="h-20 w-20 rounded-full border border-gray-200">
+                            <p class="text-sm text-gray-500 mt-1">Foto atual</p>
+                        </div>
+                    {% endif %}
+                    {{ form.foto }}
+                    {% if form.foto.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.foto.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Formatos aceitos: JPG, PNG. Tamanho máximo: 2MB</p>
+                </div>
+
+                <div>
+                    <label for="{{ form.observacoes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Observações
+                    </label>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.observacoes.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    {% if campeonato_id %}
+                        <a href="{% url 'campeonato:campeonato_gerenciar' campeonato_id %}" class="btn btn-secondary">
+                            <i class="bi bi-x mr-1"></i> Cancelar
+                        </a>
+                    {% else %}
+                        <a href="{% url 'campeonato:profissionais_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-x mr-1"></i> Cancelar
+                        </a>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check mr-1"></i> Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

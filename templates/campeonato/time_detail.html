@@ -1,0 +1,156 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}{{ time.nome }} - Detalhes{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center">
+            <a href="{% url 'campeonato:times_list' %}" class="text-blue-600 hover:text-blue-800 mr-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </a>
+            <h1 class="text-2xl font-bold text-gray-900">{{ time.nome }}</h1>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'campeonato:time_update' time.pk %}" 
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Editar
+            </a>
+            <a href="{% url 'campeonato:time_delete' time.pk %}" 
+               class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                Excluir
+            </a>
+        </div>
+    </div>
+
+    <!-- Time Info Card -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+        <div class="p-6">
+            <div class="flex items-start space-x-6">
+                <!-- Escudo -->
+                <div class="flex-shrink-0">
+                    {% if time.escudo %}
+                        <img src="{{ time.escudo.url }}" alt="Escudo do {{ time.nome }}" 
+                             class="w-24 h-24 object-cover rounded-lg shadow-md">
+                    {% else %}
+                        <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                            </svg>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Informações -->
+                <div class="flex-1">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Nome</h3>
+                            <p class="mt-1 text-lg font-semibold text-gray-900">{{ time.nome }}</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Cidade</h3>
+                            <p class="mt-1 text-lg text-gray-900">{{ time.cidade }}</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Ano de Fundação</h3>
+                            <p class="mt-1 text-lg text-gray-900">{{ time.ano_fundacao }}</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Campeonatos Vinculados</h3>
+                            <p class="mt-1 text-lg text-gray-900">{{ vinculos_campeonatos|length }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vínculos em Campeonatos -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Vínculos em Campeonatos</h2>
+            <p class="text-sm text-gray-500 mt-1">Times são vinculados a campeonatos específicos</p>
+        </div>
+        
+        {% if vinculos_campeonatos %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campeonato</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jogadores</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data de Inscrição</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for vinculo in vinculos_campeonatos %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ vinculo.campeonato.nome }}</div>
+                                <div class="text-sm text-gray-500">
+                                    {% if vinculo.campeonato.edicao %}{{ vinculo.campeonato.edicao }}{% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if vinculo.campeonato.status == 'nao_iniciado' %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Não iniciado
+                                    </span>
+                                {% elif vinculo.campeonato.status == 'em_andamento' %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Em andamento
+                                    </span>
+                                {% elif vinculo.campeonato.status == 'finalizado' %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        Finalizado
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ vinculo.jogadores_ativos_count }} jogador{{ vinculo.jogadores_ativos_count|pluralize:"es" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ vinculo.data_inscricao|date:"d/m/Y" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'campeonato:campeonato_detail' vinculo.campeonato.pk %}" 
+                                   class="text-blue-600 hover:text-blue-900 mr-3">Ver Campeonato</a>
+                                <a href="{% url 'campeonato:campeonato_gerenciar' vinculo.campeonato.pk %}" 
+                                   class="text-green-600 hover:text-green-900">Gerenciar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="px-6 py-8 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum vínculo com campeonatos</h3>
+                <p class="mt-1 text-sm text-gray-500">Este time ainda não foi vinculado a nenhum campeonato.</p>
+                <div class="mt-6">
+                    <a href="{% url 'campeonato:campeonatos_list' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                        </svg>
+                        Ver Campeonatos
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

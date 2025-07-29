@@ -1,0 +1,223 @@
+{% extends "base_public.html" %}
+
+{% block title %}KAMPEONATO - Sistema de Gerenciamento de Campeonatos{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-hero text-white">
+    <div class="max-w-7xl mx-auto px-4 py-20">
+        <div class="text-center fade-in">
+            <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <i class="bi bi-trophy text-4xl"></i>
+            </div>
+            
+            <h1 class="text-5xl md:text-6xl font-bold mb-6 slide-in-left">
+                KAMPEONATO
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto slide-in-right">
+                Sistema completo para gerenciamento de campeonatos de futebol.
+                Organize, gerencie e acompanhe seus torneios de forma profissional.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'campeonato:painel_login' %}"
+                   class="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center">
+                    <i class="bi bi-person mr-2"></i>Acessar Painel
+                </a>
+                <a href="#campeonatos" 
+                   class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center">
+                    <i class="bi bi-search mr-2"></i>Buscar Campeonatos
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Funcionalidades Section -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Funcionalidades Completas</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Tudo que você precisa para organizar campeonatos profissionais
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="bi bi-people text-2xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Gerenciamento de Times</h3>
+                <p class="text-gray-600">Cadastre e organize times com informações completas, escudos e histórico.</p>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="bi bi-person text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Cadastro de Jogadores</h3>
+                <p class="text-gray-600">Mantenha o cadastro completo de jogadores com fotos e documentação.</p>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="bi bi-trophy text-2xl text-purple-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Organização de Campeonatos</h3>
+                <p class="text-gray-600">Configure campeonatos em diferentes formatos: liga, mata-mata ou misto.</p>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="bi bi-calendar text-2xl text-orange-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Controle de Partidas</h3>
+                <p class="text-gray-600">Gerencie rodadas, partidas, resultados e estatísticas em tempo real.</p>
+            </div>
+            
+            <!-- Feature 5 -->
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="bi bi-bar-chart text-2xl text-red-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Estatísticas Completas</h3>
+                <p class="text-gray-600">Acompanhe gols, cartões, classificações e muito mais.</p>
+            </div>
+            
+            <!-- Feature 6 -->
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                    <i class="bi bi-cash text-2xl text-indigo-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Gestão Financeira</h3>
+                <p class="text-gray-600">Controle profissionais, árbitros, despesas e pagamentos.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Busca de Campeonatos Section -->
+<section id="campeonatos" class="bg-gray-100 py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Campeonatos Públicos</h2>
+            <p class="text-lg text-gray-600">
+                Confira os campeonatos cadastrados na plataforma
+            </p>
+        </div>
+        
+        <!-- Barra de busca -->
+        <div class="max-w-2xl mx-auto mb-8">
+            <form method="get" action="{% url 'campeonato:buscar_campeonatos' %}" class="flex">
+                <input type="text" 
+                       name="q" 
+                       placeholder="Buscar campeonatos por nome, edição ou organizador..."
+                       value="{{ request.GET.q }}"
+                       class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <button type="submit" 
+                        class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-r-lg transition-colors">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+        
+        <!-- Lista de campeonatos -->
+        {% if campeonatos %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for campeonato in campeonatos %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ campeonato.get_formato_display }}
+                            </span>
+                            <span class="text-sm text-gray-500">
+                                {{ campeonato.data_inicio|date:"d/m/Y" }}
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">
+                            {{ campeonato.nome }}
+                        </h3>
+                        
+                        {% if campeonato.edicao %}
+                        <p class="text-gray-600 mb-2">
+                            <i class="bi bi-award mr-1"></i>{{ campeonato.edicao }}
+                        </p>
+                        {% endif %}
+                        
+                        <p class="text-gray-600 mb-4">
+                            <i class="bi bi-person mr-1"></i>{{ campeonato.organizador }}
+                        </p>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
+                                {% if campeonato.esta_ativo %}
+                                    bg-green-100 text-green-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}">
+                                {% if campeonato.esta_ativo %}
+                                    <i class="bi bi-play-circle mr-1"></i>Ativo
+                                {% else %}
+                                    <i class="bi bi-pause-circle mr-1"></i>Finalizado
+                                {% endif %}
+                            </span>
+                            
+                            <a href="{% url 'campeonato:campeonato_publico' campeonato.codigo_publico %}" 
+                               class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                Ver detalhes <i class="bi bi-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if campeonatos|length >= 10 %}
+            <div class="text-center mt-8">
+                <a href="{% url 'campeonato:buscar_campeonatos' %}" 
+                   class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center">
+                    <i class="bi bi-search mr-2"></i>Ver Todos os Campeonatos
+                </a>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-trophy text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Nenhum campeonato encontrado</h3>
+                <p class="text-gray-600">Seja o primeiro a criar um campeonato na plataforma!</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-primary-600 text-white py-16">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Pronto para organizar seu campeonato?</h2>
+        <p class="text-xl text-blue-100 mb-8">
+            Junte-se aos organizadores que já confiam no KAMPEONATO para gerenciar seus torneios.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'campeonato:painel_login' %}" 
+               class="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center">
+                <i class="bi bi-person mr-2"></i>Começar Agora
+            </a>
+            <a href="{% url 'campeonato:buscar_campeonatos' %}" 
+               class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center justify-center">
+                <i class="bi bi-search mr-2"></i>Explorar Campeonatos
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

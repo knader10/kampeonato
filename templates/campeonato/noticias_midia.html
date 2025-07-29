@@ -1,0 +1,193 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Notícias e Mídia - Kampeonato{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-8">
+    <div class="flex items-center justify-between mb-2">
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+            <i class="bi bi-megaphone text-purple-600 mr-3"></i> Notícias e Mídia
+        </h1>
+        <span class="text-lg text-gray-600 font-semibold">{{ campeonato.nome }}{% if campeonato.edicao %} - {{ campeonato.edicao }}{% endif %}</span>
+    </div>
+    <div class="mb-6 border-b border-gray-200">
+        <nav class="flex space-x-8" id="tabs">
+            <button class="tab-button active border-b-2 border-purple-600 py-2 px-1 text-lg font-medium text-purple-700" onclick="showTab('noticias')">Notícias</button>
+            <button class="tab-button border-b-2 border-transparent py-2 px-1 text-lg font-medium text-gray-500 hover:text-purple-700 hover:border-purple-300" onclick="showTab('midia')">Mídia</button>
+            <button class="tab-button border-b-2 border-transparent py-2 px-1 text-lg font-medium text-gray-500 hover:text-purple-700 hover:border-purple-300" onclick="showTab('patrocinio')">Patrocínios</button>
+        </nav>
+    </div>
+    <div id="tab-content">
+        <!-- Aba Notícias -->
+        <div id="noticias-content" class="tab-content">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-purple-700 mb-4">Cadastrar Notícia</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                            <input type="text" name="titulo" class="form-input w-full" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Subtítulo</label>
+                            <input type="text" name="subtitulo" class="form-input w-full">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                            <textarea name="descricao" class="form-input w-full" rows="4" required></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Imagens</label>
+                            <input type="file" name="imagens" multiple class="form-input w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white">Salvar Notícia</button>
+                    </div>
+                </form>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-semibold text-purple-700 mb-4">Últimas Notícias</h2>
+                {% if noticias %}
+                    <div class="space-y-6">
+                        {% for noticia in noticias %}
+                        <div class="border-b pb-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="text-xl font-bold text-gray-800">{{ noticia.titulo }}</div>
+                                    {% if noticia.subtitulo %}<div class="text-gray-500">{{ noticia.subtitulo }}</div>{% endif %}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="text-xs text-gray-400">Atualizado em {{ noticia.ultima_atualizacao|date:'d/m/Y H:i' }}</div>
+                                    <form method="post" onsubmit="return confirm('Excluir esta notícia?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_noticia">
+                                        <input type="hidden" name="noticia_id" value="{{ noticia.id }}">
+                                        <button type="submit" class="text-red-600 hover:text-red-800 ml-2" title="Excluir"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-gray-700">{{ noticia.descricao }}</div>
+                            {% if noticia.imagens.all %}
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                {% for img in noticia.imagens.all %}
+                                    <div class="relative inline-block">
+                                        <img src="{{ img.imagem.url }}" alt="Imagem Notícia" class="h-20 rounded shadow">
+                                        <form method="post" class="absolute top-0 right-0" onsubmit="return confirm('Excluir esta imagem?')">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_imagem_noticia">
+                                            <input type="hidden" name="imagem_id" value="{{ img.id }}">
+                                            <button type="submit" class="bg-white text-red-600 rounded-full p-1 shadow" title="Excluir imagem"><i class="bi bi-x"></i></button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-gray-500">Nenhuma notícia cadastrada ainda.</div>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Aba Mídia -->
+        <div id="midia-content" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-purple-700 mb-4">Cadastrar Mídia</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Imagens</label>
+                            <input type="file" name="midia_imagens" multiple class="form-input w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white">Salvar Mídia</button>
+                    </div>
+                </form>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-semibold text-purple-700 mb-4">Galeria de Mídia</h2>
+                {% if midias %}
+                <div class="flex flex-wrap gap-4">
+                    {% for midia in midias %}
+                        <div class="relative inline-block">
+                            <img src="{{ midia.imagem.url }}" alt="Mídia" class="h-24 rounded shadow">
+                            <form method="post" class="absolute top-0 right-0" onsubmit="return confirm('Excluir esta mídia?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_midia">
+                                <input type="hidden" name="midia_id" value="{{ midia.id }}">
+                                <button type="submit" class="bg-white text-red-600 rounded-full p-1 shadow" title="Excluir mídia"><i class="bi bi-x"></i></button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-gray-500">Nenhuma mídia cadastrada ainda.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Aba Patrocínios -->
+        <div id="patrocinio-content" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-purple-700 mb-4">Cadastrar Patrocínio</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Patrocínios (imagem)</label>
+                            <input type="file" name="patrocinios" multiple class="form-input w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white">Salvar Patrocínio</button>
+                    </div>
+                </form>
+            </div>
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-lg font-semibold text-purple-700 mb-4">Patrocínios</h2>
+                {% if patrocinios %}
+                <div class="flex flex-wrap gap-4">
+                    {% for pat in patrocinios %}
+                        <div class="flex flex-col items-center relative">
+                            <img src="{{ pat.imagem.url }}" alt="Patrocínio" class="h-16 rounded shadow border-2 border-yellow-400">
+                            {% if pat.nome %}<span class="text-xs text-gray-600 mt-1">{{ pat.nome }}</span>{% endif %}
+                            <form method="post" class="absolute top-0 right-0" onsubmit="return confirm('Excluir este patrocínio?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_patrocinio">
+                                <input type="hidden" name="patrocinio_id" value="{{ pat.id }}">
+                                <button type="submit" class="bg-white text-red-600 rounded-full p-1 shadow" title="Excluir patrocínio"><i class="bi bi-x"></i></button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-gray-500">Nenhum patrocínio cadastrado ainda.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function showTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(function(el) {
+        el.classList.add('hidden');
+    });
+    document.getElementById(tab+'-content').classList.remove('hidden');
+    document.querySelectorAll('.tab-button').forEach(function(btn) {
+        btn.classList.remove('active', 'border-b-2', 'border-purple-600', 'text-purple-700');
+        btn.classList.add('border-transparent', 'text-gray-500');
+    });
+    var tabNames = { 'noticias': 'Notícias', 'midia': 'Mídia', 'patrocinio': 'Patrocínios' };
+    var activeBtn = Array.from(document.querySelectorAll('.tab-button')).find(btn => btn.textContent.trim() === tabNames[tab]);
+    if (activeBtn) {
+        activeBtn.classList.add('active', 'border-b-2', 'border-purple-600', 'text-purple-700');
+        activeBtn.classList.remove('border-transparent', 'text-gray-500');
+    }
+}
+</script>
+{% endblock %} 

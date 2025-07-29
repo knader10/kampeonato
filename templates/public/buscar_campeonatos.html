@@ -1,0 +1,206 @@
+{% extends "base_public.html" %}
+
+{% block title %}Buscar Campeonatos - KAMPEONATO{% endblock %}
+
+{% block content %}
+<!-- Header da busca -->
+<section class="bg-primary-600 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-4">Buscar Campeonatos</h1>
+            <p class="text-xl text-blue-100">
+                Encontre campeonatos por nome, edição ou organizador
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Barra de busca -->
+<section class="bg-white shadow-sm border-b py-6">
+    <div class="max-w-7xl mx-auto px-4">
+        <form method="get" class="max-w-2xl mx-auto">
+            <div class="flex">
+                <input type="text" 
+                       name="q" 
+                       placeholder="Digite o nome do campeonato, edição ou organizador..."
+                       value="{{ query }}"
+                       class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <button type="submit" 
+                        class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-r-lg transition-colors">
+                    <i class="bi bi-search mr-2"></i>Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Resultados -->
+<section class="py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Info da busca -->
+        {% if query %}
+        <div class="mb-6">
+            <p class="text-gray-600">
+                Resultados para "<strong>{{ query }}</strong>" 
+                {% if page_obj %}
+                - {{ page_obj.paginator.count }} campeonato{{ page_obj.paginator.count|pluralize }}
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Lista de campeonatos -->
+        {% if page_obj.object_list %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {% for campeonato in page_obj.object_list %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ campeonato.get_formato_display }}
+                            </span>
+                            <span class="text-sm text-gray-500">
+                                {{ campeonato.data_inicio|date:"d/m/Y" }}
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">
+                            {{ campeonato.nome }}
+                        </h3>
+                        
+                        {% if campeonato.edicao %}
+                        <p class="text-gray-600 mb-2">
+                            <i class="bi bi-award mr-1"></i>{{ campeonato.edicao }}
+                        </p>
+                        {% endif %}
+                        
+                        <p class="text-gray-600 mb-2">
+                            <i class="bi bi-person mr-1"></i>{{ campeonato.organizador }}
+                        </p>
+                        
+                        {% if campeonato.data_fim %}
+                        <p class="text-gray-600 mb-4">
+                            <i class="bi bi-calendar mr-1"></i>
+                            {{ campeonato.data_inicio|date:"d/m/Y" }} a {{ campeonato.data_fim|date:"d/m/Y" }}
+                        </p>
+                        {% else %}
+                        <p class="text-gray-600 mb-4">
+                            <i class="bi bi-calendar mr-1"></i>
+                            Iniciado em {{ campeonato.data_inicio|date:"d/m/Y" }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
+                                {% if campeonato.esta_ativo %}
+                                    bg-green-100 text-green-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}">
+                                {% if campeonato.esta_ativo %}
+                                    <i class="bi bi-play-circle mr-1"></i>Ativo
+                                {% else %}
+                                    <i class="bi bi-pause-circle mr-1"></i>Finalizado
+                                {% endif %}
+                            </span>
+                            
+                            <a href="{% url 'campeonato:campeonato_publico' campeonato.codigo_publico %}" 
+                               class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                Ver detalhes <i class="bi bi-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação -->
+            {% if page_obj.has_other_pages %}
+            <div class="flex justify-center">
+                <nav class="flex items-center space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?q={{ query }}&page=1" 
+                           class="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                        <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" 
+                           class="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-4 py-2 bg-primary-600 text-white border border-primary-600 rounded-lg">
+                                {{ num }}
+                            </span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?q={{ query }}&page={{ num }}" 
+                               class="px-4 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" 
+                           class="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}" 
+                           class="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Estado vazio -->
+            <div class="text-center py-16">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="bi bi-search text-3xl text-gray-400"></i>
+                </div>
+                
+                {% if query %}
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Nenhum campeonato encontrado</h3>
+                    <p class="text-gray-600 mb-6">
+                        Não encontramos campeonatos com os termos "{{ query }}".
+                        Tente buscar com outros termos.
+                    </p>
+                    <a href="{% url 'campeonato:buscar_campeonatos' %}" 
+                       class="text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="bi bi-arrow-left mr-1"></i>Ver todos os campeonatos
+                    </a>
+                {% else %}
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Nenhum campeonato cadastrado</h3>
+                    <p class="text-gray-600 mb-6">
+                        Ainda não há campeonatos públicos cadastrados na plataforma.
+                    </p>
+                    <a href="{% url 'campeonato:painel_login' %}"
+                       class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center">
+                        <i class="bi bi-plus mr-2"></i>Criar Primeiro Campeonato
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA Section -->
+{% if page_obj.object_list %}
+<section class="bg-gray-100 py-12">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Organize seu próprio campeonato</h2>
+        <p class="text-gray-600 mb-6">
+            Crie e gerencie campeonatos profissionais com todas as funcionalidades do KAMPEONATO.
+        </p>
+        <a href="{% url 'campeonato:painel_login' %}"
+           class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center">
+            <i class="bi bi-trophy mr-2"></i>Começar Agora
+        </a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

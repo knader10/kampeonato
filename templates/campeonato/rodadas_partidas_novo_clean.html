@@ -1,0 +1,313 @@
+{% load i18n %}
+
+<div class="max-w-7xl mx-auto space-y-4">
+    <!-- Header compacto da seção -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg p-4 text-white shadow-lg">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i class="bi bi-calendar-event text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold mb-1">Rodadas & Partidas</h1>
+                    <div class="flex items-center space-x-4 text-blue-100 text-sm">
+                        <span class="flex items-center">
+                            <i class="bi bi-trophy mr-1"></i>
+                            {% if campeonato.tipo_formato == 'liga' %}
+                                Formato Liga{% if campeonato.ida_volta %} • Ida e Volta{% endif %}
+                            {% elif campeonato.tipo_formato == 'mata_mata' %}
+                                Formato Mata-Mata
+                            {% elif campeonato.tipo_formato == 'misto' %}
+                                Formato Misto
+                            {% endif %}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="bi bi-people mr-1"></i>
+                            {{ times_campeonato|length }} times
+                        </span>
+                        {% if rodadas_campeonato %}
+                        <span class="flex items-center">
+                            <i class="bi bi-calendar-check mr-1"></i>
+                            {{ rodadas_campeonato|length }} rodadas
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" 
+                    class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200" 
+                    onclick="gerarRodadas()">
+                <i class="bi bi-calendar-plus mr-1"></i>
+                {% if rodadas_campeonato %}Regenerar Rodadas{% else %}Gerar Rodadas{% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Verificação de times suficientes -->
+    {% if times_campeonato|length < 2 %}
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
+            <div class="text-center">
+                <div class="bg-amber-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="bi bi-exclamation-triangle text-xl text-amber-600"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Times Necessários</h3>
+                <p class="text-gray-600 mb-4">
+                    São necessários pelo menos 2 times para gerar rodadas e partidas.
+                </p>
+                <button onclick="showTab('times')" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <i class="bi bi-people mr-2"></i>
+                    Gerenciar Times
+                </button>
+            </div>
+        </div>
+    {% else %}
+        <!-- Interface de navegação de rodadas -->
+        {% if rodadas_campeonato %}
+            <!-- Mini cabeçalho de navegação entre rodadas -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-3">
+                <div class="flex items-center justify-between">
+                    <button id="btnAnterior" onclick="navegarRodada(-1)" 
+                            class="flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                        <i class="bi bi-chevron-left mr-1"></i>
+                        Anterior
+                    </button>
+                    
+                    <div class="flex items-center space-x-2 text-center">
+                        <h2 id="tituloRodadaAtual" class="text-base font-bold text-gray-900"></h2>
+                        <span id="contadorRodadas" class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded"></span>
+                    </div>
+                    
+                    <button id="btnProximo" onclick="navegarRodada(1)" 
+                            class="flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                        Próxima
+                        <i class="bi bi-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Container das partidas da rodada atual -->
+            <div id="containerPartidas" class="bg-white rounded-lg shadow-md border border-gray-200">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+
+            <!-- Dados das rodadas (hidden, usado pelo JavaScript) -->
+            <script type="application/json" id="dadosRodadas">
+                [
+                {% for rodada in rodadas_campeonato %}
+                {
+                    "id": {{ rodada.id }},
+                    "nome": "{{ rodada.nome|escapejs }}",
+                    "numero": {{ rodada.numero|default:forloop.counter }},
+                    "data": {% if rodada.data %}"{{ rodada.data|date:'d/m/Y' }}"{% else %}null{% endif %},
+                    "partidas": [
+                        {% for partida in rodada.partidas.all %}
+                        {
+                            "id": {{ partida.id }},
+                            "mandante": {
+                                "nome": "{{ partida.time_mandante.time.nome|escapejs }}",
+                                "escudo": {% if partida.time_mandante.time.escudo %}"{{ partida.time_mandante.time.escudo.url }}"{% else %}null{% endif %}
+                            },
+                            "visitante": {
+                                "nome": "{{ partida.time_visitante.time.nome|escapejs }}",
+                                "escudo": {% if partida.time_visitante.time.escudo %}"{{ partida.time_visitante.time.escudo.url }}"{% else %}null{% endif %}
+                            },
+                            "placar_mandante": {{ partida.placar_mandante }},
+                            "placar_visitante": {{ partida.placar_visitante }},
+                            "status": "{{ partida.status }}",
+                            "data_hora": {% if partida.data_hora %}"{{ partida.data_hora|date:'d/m/Y H:i' }}"{% else %}null{% endif %},
+                            "local": "{{ partida.local|escapejs }}"
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+                ]
+            </script>
+
+        {% else %}
+            <!-- Estado sem rodadas -->
+            <div class="bg-gray-50 rounded-lg p-8 text-center">
+                <div class="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-calendar-plus text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Nenhuma rodada encontrada</h3>
+                <p class="text-gray-600 mb-4">Clique no botão "Gerar Rodadas" para criar as rodadas e partidas do campeonato.</p>
+                <button onclick="gerarRodadas()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    <i class="bi bi-calendar-plus mr-2"></i>
+                    Gerar Rodadas
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- JavaScript para navegação entre rodadas -->
+<script>
+    let rodadasData = [];
+    let rodadaAtualIndex = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Carregar dados das rodadas
+        const dadosScript = document.getElementById('dadosRodadas');
+        if (dadosScript) {
+            try {
+                rodadasData = JSON.parse(dadosScript.textContent);
+                if (rodadasData.length > 0) {
+                    exibirRodada(0);
+                }
+            } catch (e) {
+                console.error('Erro ao carregar dados das rodadas:', e);
+            }
+        }
+    });
+
+    function navegarRodada(direcao) {
+        const novoIndex = rodadaAtualIndex + direcao;
+        if (novoIndex >= 0 && novoIndex < rodadasData.length) {
+            exibirRodada(novoIndex);
+        }
+    }
+
+    function exibirRodada(index) {
+        if (index < 0 || index >= rodadasData.length) return;
+        
+        rodadaAtualIndex = index;
+        const rodada = rodadasData[index];
+        
+        // Atualizar título e contador
+        document.getElementById('tituloRodadaAtual').textContent = rodada.nome;
+        document.getElementById('contadorRodadas').textContent = `${index + 1} de ${rodadasData.length}`;
+        
+        // Atualizar botões de navegação
+        document.getElementById('btnAnterior').disabled = index === 0;
+        document.getElementById('btnProximo').disabled = index === rodadasData.length - 1;
+        
+        // Gerar HTML das partidas
+        const container = document.getElementById('containerPartidas');
+        container.innerHTML = gerarHtmlPartidas(rodada);
+    }
+
+    function gerarHtmlPartidas(rodada) {
+        if (!rodada.partidas || rodada.partidas.length === 0) {
+            return `
+                <div class="p-6 text-center text-gray-500">
+                    <i class="bi bi-calendar-x text-3xl mb-2"></i>
+                    <p>Nenhuma partida programada para esta rodada</p>
+                </div>
+            `;
+        }
+
+        let html = `
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-semibold text-gray-900">${rodada.nome}</h3>
+                    <div class="flex items-center space-x-2">
+                        ${rodada.data ? `
+                            <span class="text-xs text-gray-600 flex items-center">
+                                <i class="bi bi-calendar3 mr-1"></i>
+                                ${rodada.data}
+                            </span>
+                        ` : `
+                            <span class="text-xs text-gray-400 flex items-center">
+                                <i class="bi bi-calendar3 mr-1"></i>
+                                Data não definida
+                            </span>
+                        `}
+                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">
+                            ${rodada.partidas.length} partidas
+                        </span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+        `;
+
+        rodada.partidas.forEach(partida => {
+            const statusClass = {
+                'nao_iniciada': 'bg-gray-100 text-gray-700',
+                'em_andamento': 'bg-yellow-100 text-yellow-800',
+                'finalizada': 'bg-green-100 text-green-800'
+            }[partida.status] || 'bg-gray-100 text-gray-700';
+
+            const statusText = {
+                'nao_iniciada': 'Não iniciada',
+                'em_andamento': 'Em andamento', 
+                'finalizada': 'Finalizada'
+            }[partida.status] || 'Não iniciada';
+
+            html += `
+                <div class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <!-- Times -->
+                        <div class="flex items-center space-x-3 flex-1">
+                            <!-- Time Mandante -->
+                            <div class="flex items-center space-x-2 flex-1 min-w-0">
+                                ${partida.mandante.escudo ? 
+                                    `<img src="${partida.mandante.escudo}" alt="${partida.mandante.nome}" class="w-6 h-6 rounded-full">` :
+                                    `<div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">
+                                        <i class="bi bi-shield text-xs"></i>
+                                    </div>`
+                                }
+                                <span class="font-medium text-gray-900 truncate text-sm">${partida.mandante.nome}</span>
+                            </div>
+                            
+                            <!-- Placar -->
+                            <div class="flex items-center space-x-1 px-2 py-1 bg-white rounded border border-gray-300">
+                                <span class="font-bold text-base">${partida.placar_mandante}</span>
+                                <span class="text-gray-400 text-sm">×</span>
+                                <span class="font-bold text-base">${partida.placar_visitante}</span>
+                            </div>
+                            
+                            <!-- Time Visitante -->
+                            <div class="flex items-center space-x-2 flex-1 min-w-0 justify-end">
+                                <span class="font-medium text-gray-900 truncate text-sm">${partida.visitante.nome}</span>
+                                ${partida.visitante.escudo ? 
+                                    `<img src="${partida.visitante.escudo}" alt="${partida.visitante.nome}" class="w-6 h-6 rounded-full">` :
+                                    `<div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">
+                                        <i class="bi bi-shield text-xs"></i>
+                                    </div>`
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Info adicional -->
+                        <div class="flex items-center space-x-2 ml-3">
+                            <span class="text-xs px-2 py-1 rounded ${statusClass} whitespace-nowrap">${statusText}</span>
+                            <button onclick="gerenciarPartida(${partida.id})" 
+                                    class="text-gray-400 hover:text-gray-600 p-1" 
+                                    title="Gerenciar partida">
+                                <i class="bi bi-pencil text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ${partida.data_hora || partida.local ? `
+                        <div class="mt-2 flex items-center space-x-3 text-xs text-gray-500">
+                            ${partida.data_hora ? `
+                                <span class="flex items-center">
+                                    <i class="bi bi-clock mr-1"></i>
+                                    ${partida.data_hora}
+                                </span>
+                            ` : ''}
+                            ${partida.local ? `
+                                <span class="flex items-center">
+                                    <i class="bi bi-geo-alt mr-1"></i>
+                                    ${partida.local}
+                                </span>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+</script>

@@ -1,0 +1,20 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Excluir Campeonato{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto mt-16 bg-white rounded-xl shadow-lg p-8">
+    <h1 class="text-2xl font-bold text-red-700 mb-4 flex items-center">
+        <i class="bi bi-exclamation-triangle-fill text-3xl mr-2"></i>
+        Confirmar Exclusão
+    </h1>
+    <p class="mb-6 text-gray-700">Tem certeza que deseja <span class="font-semibold text-red-700">excluir</span> o campeonato <span class="font-semibold">"{{ object.nome }}"</span>? Esta ação não pode ser desfeita.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="flex justify-end gap-4">
+            <a href="{% url 'campeonato:campeonatos_list' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-danger">Excluir</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

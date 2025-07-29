@@ -1,0 +1,213 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Times - Kampeonato Admin{% endblock %}
+
+{% block content %}
+<div>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Gerenciamento de Times</h1>
+        <button id="toggleFormBtn" class="md:hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+            <i class="bi bi-plus-circle mr-2"></i> Novo Time
+        </button>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Formulário para adicionar time (responsivo) -->
+        <div id="formPanel" class="lg:col-span-1 hidden lg:block">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                    <h2 class="font-semibold text-lg text-white flex items-center">
+                        <i class="bi bi-shield-plus mr-2"></i> Adicionar Time
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <form method="post" action="{% url 'campeonato:time_create' %}" enctype="multipart/form-data" class="space-y-4">
+                        {% csrf_token %}
+                        
+                        <div>
+                            <label for="{{ form.nome.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Nome do Time</label>
+                            {{ form.nome }}
+                            {% if form.nome.errors %}
+                                <p class="mt-1 text-sm text-red-600">
+                                    {{ form.nome.errors }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label for="{{ form.cidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                            {{ form.cidade }}
+                            {% if form.cidade.errors %}
+                                <p class="mt-1 text-sm text-red-600">
+                                    {{ form.cidade.errors }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label for="{{ form.ano_fundacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Ano de Fundação</label>
+                            {{ form.ano_fundacao }}
+                            {% if form.ano_fundacao.errors %}
+                                <p class="mt-1 text-sm text-red-600">
+                                    {{ form.ano_fundacao.errors }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label for="{{ form.escudo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Escudo do Time</label>
+                            <div class="flex items-center">
+                                <label class="w-full flex flex-col items-center px-4 py-2 bg-white text-blue-600 rounded-lg border border-blue-500 cursor-pointer hover:bg-blue-50">
+                                    <i class="bi bi-upload"></i>
+                                    <span class="mt-2 text-sm">Selecione uma imagem</span>
+                                    {{ form.escudo }}
+                                </label>
+                            </div>
+                            {% if form.escudo.errors %}
+                                <p class="mt-1 text-sm text-red-600">
+                                    {{ form.escudo.errors }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="pt-4">
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white px-4 py-2 rounded-lg flex items-center justify-center">
+                                <i class="bi bi-save mr-2"></i> Salvar Time
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lista de times -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4 flex justify-between items-center">
+                    <h2 class="font-semibold text-lg text-white">Times Cadastrados</h2>
+                    {% if times %}
+                    <span class="bg-white text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                        {{ times|length }} times
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="p-6">
+                    {% if times %}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Escudo</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fundação</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for time in times %}
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center justify-center">
+                                                    {% if time.escudo %}
+                                                        <img src="{{ time.escudo.url }}" alt="Escudo do {{ time.nome }}" class="h-10 w-10 object-contain rounded-full bg-gray-100 p-1">
+                                                    {% else %}
+                                                        <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                                            <i class="bi bi-shield"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">{{ time.nome }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-500">{{ time.cidade }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-500">{{ time.ano_fundacao }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <a href="{% url 'campeonato:time_detail' time.id %}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <i class="bi bi-pencil"></i><span class="hidden sm:inline"> Editar</span>
+                                                </a>
+                                                <a href="{% url 'campeonato:time_delete' time.id %}" class="text-red-600 hover:text-red-900">
+                                                    <i class="bi bi-trash"></i><span class="hidden sm:inline"> Excluir</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center justify-center p-6 text-center">
+                            <div>
+                                <div class="mx-auto h-24 w-24 text-gray-400 flex items-center justify-center rounded-full bg-gray-100">
+                                    <i class="bi bi-shield text-5xl"></i>
+                                </div>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum time cadastrado</h3>
+                                <p class="mt-1 text-sm text-gray-500">Comece adicionando um novo time agora.</p>
+                                <div class="mt-6 lg:hidden">
+                                    <button id="showFormBtn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <i class="bi bi-plus-circle mr-2"></i>
+                                        Adicionar Time
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elementos
+        const toggleFormBtn = document.getElementById('toggleFormBtn');
+        const showFormBtn = document.getElementById('showFormBtn');
+        const formPanel = document.getElementById('formPanel');
+        
+        // Esconder o input de arquivo e substituir por um estilizado
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) {
+            fileInput.style.display = 'none';
+        }
+        
+        // Toggle para exibir/esconder o formulário em telas menores
+        if (toggleFormBtn && formPanel) {
+            toggleFormBtn.addEventListener('click', function() {
+                formPanel.classList.toggle('hidden');
+                formPanel.classList.toggle('block');
+                
+                // Alterar texto do botão
+                if (formPanel.classList.contains('hidden')) {
+                    toggleFormBtn.innerHTML = '<i class="bi bi-plus-circle mr-2"></i> Novo Time';
+                } else {
+                    toggleFormBtn.innerHTML = '<i class="bi bi-x-circle mr-2"></i> Fechar';
+                }
+            });
+        }
+        
+        // Botão para mostrar formulário quando não há times
+        if (showFormBtn && formPanel) {
+            showFormBtn.addEventListener('click', function() {
+                formPanel.classList.remove('hidden');
+                formPanel.classList.add('block');
+                
+                if (toggleFormBtn) {
+                    toggleFormBtn.innerHTML = '<i class="bi bi-x-circle mr-2"></i> Fechar';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}

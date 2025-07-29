@@ -1,0 +1,481 @@
+{% extends "adminpanel/base.html" %}
+{% load planos_extras %}
+
+{% block title %}Dashboard - Kampeonato Admin{% endblock %}
+
+{% block content %}
+<div>
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card de boas-vindas -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-2">Bem-vindo!</h2>
+                        <p class="text-blue-100">Olá, {{ user.nome }}. Bem-vindo ao painel administrativo.</p>
+                    </div>
+                    <div class="bg-white/20 rounded-full p-3">
+                        <i class="bi bi-person-circle text-3xl text-white"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'campeonato:perfil' %}" class="inline-flex items-center px-4 py-2 bg-white text-blue-700 rounded-lg font-medium hover:bg-blue-50 transition-all">
+                        <i class="bi bi-gear me-2"></i> Meu Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card de Times -->
+        <div class="bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-2">Times</h2>
+                        <p class="text-green-100">Gerencie seus times inscritos.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-4xl font-bold text-white">{{ times_count }}</span>
+                        <span class="text-green-100 text-sm">Total</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'campeonato:times_list' %}" class="inline-flex items-center px-4 py-2 bg-white text-green-600 rounded-lg font-medium hover:bg-green-50 transition-all">
+                        <i class="bi bi-shield me-2"></i> Ver Times
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card de Jogadores -->
+        <div class="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-2">Jogadores</h2>
+                        <p class="text-blue-100">Gerencie jogadores cadastrados.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-4xl font-bold text-white">{{ jogadores_count }}</span>
+                        <span class="text-blue-100 text-sm">Total</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'campeonato:jogadores_list' %}" class="inline-flex items-center px-4 py-2 bg-white text-blue-500 rounded-lg font-medium hover:bg-blue-50 transition-all">
+                        <i class="bi bi-people me-2"></i> Ver Jogadores
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card de Campeonatos -->
+        <div class="bg-gradient-to-r from-amber-400 to-orange-500 rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-2">Campeonatos</h2>
+                        <p class="text-amber-100">Gerencie seus campeonatos.</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-4xl font-bold text-white">{{ campeonatos_count }}</span>
+                        <span class="text-amber-100 text-sm">Total</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'campeonato:campeonatos_list' %}" class="inline-flex items-center px-4 py-2 bg-white text-amber-600 rounded-lg font-medium hover:bg-amber-50 transition-all">
+                        <i class="bi bi-trophy me-2"></i> Ver Campeonatos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Próximos Jogos e Status -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <!-- Próximos Jogos -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
+                <h2 class="font-semibold text-lg">Próximos Jogos</h2>
+                <a href="{% url 'campeonato:campeonatos_list' %}" class="px-3 py-1 bg-transparent border border-white rounded text-sm hover:bg-white hover:text-gray-800 transition-colors">
+                    Ver Todos
+                </a>
+            </div>
+            <div class="p-6">
+                {% if proximos_jogos %}
+                    <div class="divide-y">
+                        {% for partida in proximos_jogos %}
+                            <div class="py-3 flex justify-between items-center {% if not forloop.last %}border-b border-gray-100{% endif %}">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="flex-1">
+                                            <div class="font-medium">{{ partida.time_mandante.time.nome }} x {{ partida.time_visitante.time.nome }}</div>
+                                            <div class="text-sm text-gray-500 flex items-center">
+                                                <i class="bi bi-calendar-event mr-1"></i>
+                                                {{ partida.data_hora|date:"d/m/Y H:i" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                    {{ partida.rodada.campeonato.nome }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="flex items-center p-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
+                        <i class="bi bi-info-circle-fill flex-shrink-0 inline mr-3"></i>
+                        <span>Nenhum jogo agendado ainda.</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Status dos Campeonatos -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
+                <h2 class="font-semibold text-lg">Status dos Campeonatos</h2>
+                <a href="{% url 'campeonato:campeonatos_list' %}" class="px-3 py-1 bg-transparent border border-white rounded text-sm hover:bg-white hover:text-gray-800 transition-colors">
+                    Ver Todos
+                </a>
+            </div>
+            <div class="p-6">
+                {% if campeonatos_status %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Início</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for campeonato in campeonatos_status %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="font-medium text-gray-900">{{ campeonato.nome }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500">{{ campeonato.data_inicio|date:"d/m/Y" }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {% now "Y-m-d" as today_date %}
+                                            {% if campeonato.data_inicio|date:"Y-m-d" > today_date %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    <span class="w-2 h-2 mr-1 bg-blue-500 rounded-full"></span>
+                                                    Não Iniciado
+                                                </span>
+                                            {% elif not campeonato.data_fim or campeonato.data_fim|date:"Y-m-d" > today_date %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
+                                                    Em Andamento
+                                                </span>
+                                            {% else %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                    <span class="w-2 h-2 mr-1 bg-gray-500 rounded-full"></span>
+                                                    Finalizado
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="flex items-center p-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
+                        <i class="bi bi-info-circle-fill flex-shrink-0 inline mr-3"></i>
+                        <span>Nenhum campeonato cadastrado ainda.</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Seção de Planos -->
+    <div class="mt-12">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Planos Kampeonato</h2>
+            <p class="text-gray-600 text-lg">Escolha o plano ideal para seu campeonato</p>
+            
+            <!-- Seletor de Periodicidade -->
+            <div class="mt-6">
+                <div class="flex justify-center">
+                    <div class="bg-gray-100 rounded-lg p-1 inline-flex">
+                        <button onclick="alterarPeriodicidadeDashboard('mensal')" id="dash-btn-mensal" class="px-6 py-3 text-sm font-medium rounded-md transition-all bg-blue-600 text-white">
+                            Mensal
+                        </button>
+                        <button onclick="alterarPeriodicidadeDashboard('trimestral')" id="dash-btn-trimestral" class="px-6 py-3 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">
+                            Trimestral
+                            <span class="ml-1 text-xs bg-green-100 text-green-600 px-2 py-1 rounded">-10%</span>
+                        </button>
+                        <button onclick="alterarPeriodicidadeDashboard('anual')" id="dash-btn-anual" class="px-6 py-3 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-800">
+                            Anual
+                            <span class="ml-1 text-xs bg-green-100 text-green-600 px-2 py-1 rounded">-15%</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Plano Básico -->
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div class="p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi bi-star text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">Básico</h3>
+                        <div class="mt-4">
+                            <span class="text-4xl font-bold text-green-600" id="dash-preco-basico">R$ 14,97</span>
+                            <span class="text-gray-500" id="dash-periodo-basico">/mês</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Até 70 jogadores por campeonato</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Até 1 patrocinador</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Até 3 campeonatos</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Site personalizado</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Exportação Excel</span>
+                        </li>
+                    </ul>
+                    
+                    <a id="btn-botao-basico" href="{% url 'checkout_mercadopago' 'basico' 'mensal' %}" class="w-full block bg-green-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-green-700 transition-all text-center">
+                        Escolher Básico
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Plano Pró -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl border-2 border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative">
+                {% if plano_atual_id == 'pro' %}
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-blue-500 text-white px-6 py-2 rounded-full text-sm font-bold">ATUAL</span>
+                </div>
+                {% endif %}
+                <div class="p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi bi-gem text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-blue-800">Pró</h3>
+                        <p class="text-xs text-blue-600 italic mt-1">Campeonatos Municipais Pequenos</p>
+                        <div class="mt-4">
+                            <span class="text-4xl font-bold text-blue-600" id="dash-preco-pro">R$ 33,97</span>
+                            <span class="text-blue-500" id="dash-periodo-pro">/mês</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Até 230 jogadores por campeonato</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Sem limite de patrocinadores</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Sem limite de campeonatos</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Site personalizado</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Exportação Excel</span>
+                        </li>
+                    </ul>
+                    
+                    <a id="btn-botao-pro" href="{% url 'checkout_mercadopago' 'pro' 'mensal' %}" class="w-full block bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 transition-all text-center">
+                        Escolher Pró
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Plano Premium -->
+            <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl shadow-xl border border-orange-300 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-6 py-2 rounded-full text-sm font-bold">POPULAR</span>
+                </div>
+                <div class="p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi bi-crown text-orange-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-orange-800">Premium</h3>
+                        <p class="text-xs text-orange-600 italic mt-1">Campeonatos Municipais Maiores</p>
+                        <div class="mt-4">
+                            <span class="text-4xl font-bold text-orange-600" id="dash-preco-premium">R$ 49,97</span>
+                            <span class="text-orange-500" id="dash-periodo-premium">/mês</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Até 500 jogadores por campeonato</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Sem limite de patrocinadores</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Sem limite de campeonatos</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Site personalizado</span>
+                        </li>
+                        <li class="flex items-center text-sm">
+                            <i class="bi bi-check-circle-fill text-green-500 mr-3"></i>
+                            <span>Exportação Excel</span>
+                        </li>
+                    </ul>
+                    
+                    <a id="btn-botao-premium" href="{% url 'checkout_mercadopago' 'premium' 'mensal' %}" class="w-full block bg-gradient-to-r from-orange-500 to-yellow-500 text-white py-3 px-6 rounded-xl font-bold hover:from-orange-600 hover:to-yellow-600 transition-all shadow-lg text-center">
+                        Fazer Upgrade
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Plano Personalizado -->
+            <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-xl border border-purple-300 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div class="p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi bi-lightning text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-purple-800">Personalizado</h3>
+                        <div class="mt-4">
+                            <span class="text-2xl font-bold text-purple-600">Sob consulta</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8 text-center">
+                        <p class="text-sm text-purple-700 mb-4">Plano exclusivo para suas necessidades específicas</p>
+                        <div class="bg-purple-100 rounded-lg p-4">
+                            <p class="text-xs text-purple-800 font-medium">Recursos ilimitados e suporte dedicado</p>
+                        </div>
+                    </div>
+                    
+                    <a href="https://wa.me/5571982105992?text=Olá! Gostaria de saber mais sobre o Plano Personalizado do Kampeonato." 
+                       target="_blank"
+                       class="w-full flex items-center justify-center bg-green-500 text-white py-3 px-6 rounded-xl font-bold hover:bg-green-600 transition-all">
+                        <i class="bi bi-whatsapp mr-2"></i>Contatar WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="{% url 'campeonato:configuracoes' %}" class="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-900 transition-all">
+                <i class="bi bi-gear mr-2"></i>Ver Todas as Configurações
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Dados dos planos vindos do backend (igual configuracoes.html)
+let planosData = {{ planos_data|jsonify|safe }};
+let periodicidadeAtual = 'mensal';
+
+function alterarPeriodicidadeDashboard(periodo) {
+    periodicidadeAtual = periodo;
+    // Atualizar botões ativos
+    document.querySelectorAll('[id^="dash-btn-"]').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('text-gray-600');
+    });
+    document.getElementById(`dash-btn-${periodo}`).classList.add('bg-blue-600', 'text-white');
+    document.getElementById(`dash-btn-${periodo}`).classList.remove('text-gray-600');
+
+    // Atualizar preços nos cards
+    planosData.planos.forEach(plano => {
+        const precoElemento = document.getElementById(`dash-preco-${plano.id}`);
+        const periodoElemento = document.getElementById(`dash-periodo-${plano.id}`);
+        if (precoElemento && periodoElemento && plano.precos[periodo]) {
+            let sufixo = '';
+            let desconto = '';
+            if (periodo === 'mensal') {
+                sufixo = '/mês';
+            } else if (periodo === 'trimestral') {
+                sufixo = '/trimestre';
+                desconto = ' (10% off)';
+            } else if (periodo === 'anual') {
+                sufixo = '/ano';
+                desconto = ' (15% off)';
+            }
+            precoElemento.textContent = `R$ ${plano.precos[periodo].toFixed(2)}`;
+            periodoElemento.textContent = sufixo + desconto;
+        }
+    });
+}
+
+function selecionarPlanoDashboard(planoId) {
+// Atualiza os links dos botões conforme periodicidade selecionada
+function atualizarLinksCheckout() {
+    document.getElementById('btn-botao-basico').href = `/checkout/mercadopago/basico/${periodicidadeAtual}/`;
+    document.getElementById('btn-botao-pro').href = `/checkout/mercadopago/pro/${periodicidadeAtual}/`;
+    document.getElementById('btn-botao-premium').href = `/checkout/mercadopago/premium/${periodicidadeAtual}/`;
+}
+document.addEventListener('DOMContentLoaded', atualizarLinksCheckout);
+function alterarPeriodicidadeDashboard(periodo) {
+    periodicidadeAtual = periodo;
+    // Atualizar botões ativos
+    document.querySelectorAll('[id^="dash-btn-"]').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('text-gray-600');
+    });
+    document.getElementById(`dash-btn-${periodo}`).classList.add('bg-blue-600', 'text-white');
+    document.getElementById(`dash-btn-${periodo}`).classList.remove('text-gray-600');
+    // Atualizar preços nos cards
+    planosData.planos.forEach(plano => {
+        const precoElemento = document.getElementById(`dash-preco-${plano.id}`);
+        const periodoElemento = document.getElementById(`dash-periodo-${plano.id}`);
+        if (precoElemento && periodoElemento && plano.precos[periodo]) {
+            let sufixo = '';
+            let desconto = '';
+            if (periodo === 'mensal') {
+                sufixo = '/mês';
+            } else if (periodo === 'trimestral') {
+                sufixo = '/trimestre';
+                desconto = ' (10% off)';
+            } else if (periodo === 'anual') {
+                sufixo = '/ano';
+                desconto = ' (15% off)';
+            }
+            precoElemento.textContent = `R$ ${plano.precos[periodo].toFixed(2)}`;
+            periodoElemento.textContent = sufixo + desconto;
+        }
+    });
+    atualizarLinksCheckout();
+}
+
+// Inicializar com mensal selecionado
+document.addEventListener('DOMContentLoaded', function() {
+    alterarPeriodicidadeDashboard('mensal');
+});
+</script>
+{% endblock %}

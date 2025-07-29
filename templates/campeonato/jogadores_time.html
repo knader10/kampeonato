@@ -1,0 +1,220 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Jogadores - {{ time_campeonato.time.nome }} - Kampeonato{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center">
+            <a href="{% url 'campeonato:campeonato_gerenciar' campeonato.id %}" class="text-blue-600 hover:text-blue-800 mr-4">
+                <i class="bi bi-arrow-left text-2xl text-blue-700 font-bold drop-shadow-sm transition-all duration-200 hover:text-blue-900 hover:scale-110"></i>
+            </a>
+            <div class="flex items-center">
+                {% if time_campeonato.time.escudo %}
+                    <img class="h-12 w-12 rounded-full mr-4" src="{{ time_campeonato.time.escudo.url }}" alt="{{ time_campeonato.time.nome }}">
+                {% else %}
+                    <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-4">
+                        <i class="bi bi-shield text-xl"></i>
+                    </div>
+                {% endif %}
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ time_campeonato.time.nome }}</h1>
+                    <p class="text-gray-600 mt-1">Gerenciar jogadores do time</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex space-x-2">
+            <a href="{% url 'campeonato:jogador_create' %}?time={{ time_campeonato.time.id }}&campeonato={{ campeonato.id }}" class="btn btn-primary">
+                <i class="bi bi-plus mr-1"></i> Adicionar Jogador
+            </a>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible mb-6" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Lista de Jogadores -->
+    <div class="card">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                    <i class="bi bi-people text-blue-600 mr-2"></i>
+                    Jogadores Vinculados
+                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ jogadores|length }}
+                    </span>
+                </h3>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if jogadores %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jogador</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nascimento</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contato</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Vinculação</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for jogador_time in jogadores %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            {% if jogador_time.jogador.foto %}
+                                                <img class="h-10 w-10 rounded-full mr-4" src="{{ jogador_time.jogador.foto.url }}" alt="{{ jogador_time.jogador.nome }}">
+                                            {% else %}
+                                                <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-4">
+                                                    <i class="bi bi-person text-lg"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ jogador_time.jogador.nome }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ jogador_time.jogador.cidade|default:"—" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ jogador_time.jogador.data_nascimento|date:"d/m/Y"|default:"—" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ jogador_time.jogador.telefone|default:"—" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ jogador_time.data_entrada|date:"d/m/Y" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <a href="{% url 'campeonato:jogador_update' jogador_time.jogador.id %}?campeonato={{ campeonato.id }}" class="btn btn-secondary btn-sm">
+                                                <i class="bi bi-pencil mr-1"></i> Editar
+                                            </a>
+                                            <form method="post" action="{% url 'campeonato:desvincular_jogador_time' campeonato.id jogador_time.id %}" class="inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Desvincular {{ jogador_time.jogador.nome }}?')">
+                                                    <i class="bi bi-x-circle mr-1"></i> Desvincular
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <i class="bi bi-people text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum jogador vinculado</h3>
+                    <p class="text-gray-500 mb-6">Adicione jogadores ao time para participar do campeonato.</p>
+                    <a href="{% url 'campeonato:jogador_create' %}?time={{ time_campeonato.time.id }}&campeonato={{ campeonato.id }}" class="btn btn-primary">
+                        <i class="bi bi-plus mr-2"></i> Adicionar Primeiro Jogador
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Jogadores Disponíveis para Vincular -->
+    {% if jogadores_disponiveis %}
+        <div class="card mt-8">
+            <div class="card-header">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                    <i class="bi bi-person-plus text-green-600 mr-2"></i>
+                    Jogadores Disponíveis para Vincular
+                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{ jogadores_disponiveis|length }}
+                    </span>
+                </h3>
+                <!-- Caixa de pesquisa -->
+                <div class="mt-4 flex items-center">
+                    <div class="relative w-full md:w-1/2">
+                        <input type="text" id="pesquisa-jogador" class="form-control w-full pl-10 pr-4 py-3 rounded-xl border-2 border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-100 shadow-sm text-base transition-all duration-200" placeholder="Pesquisar jogador por nome ou cidade..." style="height: 48px; min-height: 48px;">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500 pointer-events-none">
+                            <i class="bi bi-search text-lg"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="lista-jogadores-disponiveis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for jogador in jogadores_disponiveis %}
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 jogador-item">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    {% if jogador.foto %}
+                                        <img src="{{ jogador.foto.url }}" alt="{{ jogador.nome }}" class="h-10 w-10 rounded-full mr-3">
+                                    {% else %}
+                                        <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-3">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="font-medium text-gray-900 nome-jogador">{{ jogador.nome }}</div>
+                                        <div class="text-sm text-gray-500 cidade-jogador">{{ jogador.cidade|default:"—" }}</div>
+                                    </div>
+                                </div>
+                                <form method="post" action="{% url 'campeonato:vincular_jogador_time' campeonato.id time_campeonato.id %}" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="jogador_existente" value="{{ jogador.id }}">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-plus-circle mr-1"></i> Vincular
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <script>
+        // Filtro dinâmico de jogadores
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('pesquisa-jogador');
+            const lista = document.getElementById('lista-jogadores-disponiveis');
+            if (input && lista) {
+                input.addEventListener('input', function() {
+                    const termo = this.value.toLowerCase();
+                    lista.querySelectorAll('.jogador-item').forEach(function(card) {
+                        const nome = card.querySelector('.nome-jogador').textContent.toLowerCase();
+                        const cidade = card.querySelector('.cidade-jogador').textContent.toLowerCase();
+                        if (nome.includes(termo) || cidade.includes(termo)) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+        </script>
+    {% else %}
+        <div class="card mt-8">
+            <div class="card-body">
+                <div class="text-center py-8">
+                    <i class="bi bi-person-check text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Todos os jogadores já estão vinculados</h3>
+                    <p class="text-gray-500 mb-6">Não há jogadores disponíveis para vincular a este time no momento.</p>
+                    <a href="{% url 'campeonato:jogador_create' %}?time={{ time_campeonato.time.id }}&campeonato={{ campeonato.id }}" class="btn btn-primary">
+                        <i class="bi bi-plus mr-2"></i> Criar Novo Jogador
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

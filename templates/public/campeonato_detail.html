@@ -1,0 +1,277 @@
+{% extends "base_public.html" %}
+
+{% block title %}{{ campeonato.nome }} - KAMPEONATO{% endblock %}
+
+{% block content %}
+<!-- Header do campeonato -->
+<section class="bg-primary-600 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center text-sm text-blue-200 mb-4">
+            <a href="{% url 'campeonato:index' %}" class="hover:text-white">Início</a>
+            <i class="bi bi-chevron-right mx-2"></i>
+            <a href="{% url 'campeonato:buscar_campeonatos' %}" class="hover:text-white">Campeonatos</a>
+            <i class="bi bi-chevron-right mx-2"></i>
+            <span>{{ campeonato.nome }}</span>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <h1 class="text-4xl font-bold mb-4">{{ campeonato.nome }}</h1>
+                
+                {% if campeonato.edicao %}
+                <p class="text-xl text-blue-100 mb-4">
+                    <i class="bi bi-award mr-2"></i>{{ campeonato.edicao }}
+                </p>
+                {% endif %}
+                
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <span class="inline-flex items-center px-3 py-1 bg-blue-500 bg-opacity-30 rounded-full">
+                        <i class="bi bi-person mr-2"></i>{{ campeonato.organizador }}
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 bg-blue-500 bg-opacity-30 rounded-full">
+                        <i class="bi bi-trophy mr-2"></i>{{ campeonato.get_formato_display }}
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 
+                        {% if campeonato.esta_ativo %}
+                            bg-green-500 bg-opacity-30
+                        {% else %}
+                            bg-gray-500 bg-opacity-30
+                        {% endif %} rounded-full">
+                        {% if campeonato.esta_ativo %}
+                            <i class="bi bi-play-circle mr-2"></i>Em andamento
+                        {% else %}
+                            <i class="bi bi-pause-circle mr-2"></i>Finalizado
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-1">
+                <div class="bg-white bg-opacity-10 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Informações</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-blue-200">Início:</span>
+                            <span>{{ campeonato.data_inicio|date:"d/m/Y" }}</span>
+                        </div>
+                        {% if campeonato.data_fim %}
+                        <div class="flex justify-between">
+                            <span class="text-blue-200">Término:</span>
+                            <span>{{ campeonato.data_fim|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                        {% if campeonato.numero_grupos %}
+                        <div class="flex justify-between">
+                            <span class="text-blue-200">Grupos:</span>
+                            <span>{{ campeonato.numero_grupos }}</span>
+                        </div>
+                        {% endif %}
+                        {% if campeonato.numero_classificados %}
+                        <div class="flex justify-between">
+                            <span class="text-blue-200">Classificados:</span>
+                            <span>{{ campeonato.numero_classificados }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Navegação das abas -->
+<section class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-4">
+        <nav class="flex space-x-8">
+            <button onclick="showTab('rodadas')" 
+                    id="tab-rodadas" 
+                    class="tab-button border-b-2 border-blue-600 text-blue-600 py-4 px-1 font-medium">
+                Rodadas
+            </button>
+            <button onclick="showTab('visao-geral')" 
+                    id="tab-visao-geral" 
+                    class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 font-medium">
+                Visão Geral
+            </button>
+            <button onclick="showTab('times')" 
+                    id="tab-times" 
+                    class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 font-medium">
+                Times
+            </button>
+            <button onclick="showTab('noticias')" 
+                    id="tab-noticias" 
+                    class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 font-medium">
+                Notícias
+            </button>
+        </nav>
+    </div>
+</section>
+
+<!-- Conteúdo das abas -->
+<section class="py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        
+        <!-- Aba Visão Geral (conteúdo será atualizado na próxima etapa) -->
+        <div id="content-visao-geral" class="tab-content hidden">
+            {% include 'campeonato/geral_tab.html' %}
+        </div>
+
+        <!-- Aba Times (conteúdo será atualizado na próxima etapa) -->
+        <div id="content-times" class="tab-content hidden">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {% for tc in times_campeonato %}
+                <div class="bg-white rounded-lg shadow p-3 flex flex-col items-center border border-gray-100 hover:shadow-md transition">
+                    {% if tc.time.escudo %}
+                        <img src="{{ tc.time.escudo.url }}" alt="Escudo {{ tc.time.nome }}" class="w-10 h-10 object-cover rounded-full mb-2">
+                    {% else %}
+                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+                            <i class="bi bi-shield text-gray-400 text-lg"></i>
+                        </div>
+                    {% endif %}
+                    <div class="text-sm font-semibold text-gray-800 text-center mb-1 truncate w-full">{{ tc.time.nome }}</div>
+                    <div class="text-xs text-gray-500 text-center truncate w-full">Presidente: <span class="font-medium text-gray-700">{{ tc.presidente }}</span></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Aba Rodadas (agora é a primeira, conteúdo será atualizado na próxima etapa) -->
+        <div id="content-rodadas" class="tab-content hidden">
+            <div class="mb-6 flex items-center justify-center gap-4">
+                <button id="rodada-prev" class="rounded-full bg-gray-100 hover:bg-gray-200 p-2" type="button">
+                    <i class="bi bi-chevron-left text-xl"></i>
+                </button>
+                <span id="rodada-nome" class="font-bold text-lg"></span>
+                <button id="rodada-next" class="rounded-full bg-gray-100 hover:bg-gray-200 p-2" type="button">
+                    <i class="bi bi-chevron-right text-xl"></i>
+                </button>
+            </div>
+            <div id="rodada-partidas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Aba Notícias -->
+        <div id="content-noticias" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% if noticias %}
+                    {% for noticia in noticias %}
+                    <div class="bg-white rounded-xl shadow-md p-6 flex flex-col">
+                        <div class="mb-3 flex items-center justify-between">
+                            <span class="text-xs text-gray-400">{{ noticia.data_publicacao|date:"d/m/Y" }}</span>
+                            {% if noticia.categoria %}
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">{{ noticia.categoria }}</span>
+                            {% endif %}
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">{{ noticia.titulo }}</h3>
+                        {% if noticia.imagem %}
+                        <img src="{{ noticia.imagem.url }}" alt="Imagem da notícia" class="w-full h-40 object-cover rounded mb-3">
+                        {% endif %}
+                        <p class="text-gray-600 flex-1">{{ noticia.resumo|default:noticia.conteudo|truncatewords:30 }}</p>
+                        <a href="{% url 'campeonato:noticia_detalhe' noticia.id %}" class="mt-4 inline-block text-blue-600 hover:underline font-medium">Ler mais</a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-full text-center text-gray-500 py-12">
+                        Nenhuma notícia cadastrada para este campeonato.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(tabName) {
+    // Esconder todos os conteúdos
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remover classes ativas dos botões
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('border-blue-600', 'text-blue-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Mostrar conteúdo selecionado
+    document.getElementById('content-' + tabName).classList.remove('hidden');
+    
+    // Ativar botão selecionado
+    const activeButton = document.getElementById('tab-' + tabName);
+    activeButton.classList.remove('border-transparent', 'text-gray-500');
+    activeButton.classList.add('border-blue-600', 'text-blue-600');
+}
+</script>
+<script id="rodadas-data" type="application/json" style="display:none">{{ rodadas_json|safe }}</script>
+<script>
+// Rodadas - Carrossel e exibição
+let rodadas = [];
+let rodadaAtual = 0;
+function renderRodada() {
+    const rodadaNomeSpan = document.getElementById('rodada-nome');
+    const partidasDiv = document.getElementById('rodada-partidas');
+    if (!rodadas.length) {
+        if (rodadaNomeSpan) rodadaNomeSpan.textContent = 'Nenhuma rodada disponível';
+        if (partidasDiv) partidasDiv.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">Nenhuma rodada cadastrada para este campeonato.</div>';
+        return;
+    }
+    const rodada = rodadas[rodadaAtual];
+    if (rodadaNomeSpan) rodadaNomeSpan.textContent = rodada.nome_exibicao || ('Rodada ' + (rodada.numero || (rodadaAtual+1)));
+    if (!rodada.partidas || !rodada.partidas.length) {
+        if (partidasDiv) partidasDiv.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">Nenhuma partida cadastrada para esta rodada.</div>';
+        return;
+    }
+    partidasDiv.innerHTML = '';
+    rodada.partidas.forEach(partida => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow-md p-4 flex flex-col items-center';
+        card.innerHTML = `
+            <div class="flex items-center justify-between w-full mb-2">
+                <div class="flex flex-col items-center flex-1">
+                    ${partida.time_mandante_escudo ? `<img src="${partida.time_mandante_escudo}" class="w-10 h-10 rounded-full mb-1">` : `<div class='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mb-1'><i class='bi bi-shield text-gray-400 text-lg'></i></div>`}
+                    <span class="text-xs font-medium text-gray-700 text-center">${partida.time_mandante_nome}</span>
+                </div>
+                <div class="flex flex-col items-center mx-2">
+                    <span class="text-2xl font-bold">${partida.placar_mandante ?? '-'}</span>
+                    <span class="text-xs text-gray-400">x</span>
+                    <span class="text-2xl font-bold">${partida.placar_visitante ?? '-'}</span>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                    ${partida.time_visitante_escudo ? `<img src="${partida.time_visitante_escudo}" class="w-10 h-10 rounded-full mb-1">` : `<div class='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mb-1'><i class='bi bi-shield text-gray-400 text-lg'></i></div>`}
+                    <span class="text-xs font-medium text-gray-700 text-center">${partida.time_visitante_nome}</span>
+                </div>
+            </div>
+            <div class="text-xs text-gray-500 mb-1">${partida.data_hora || ''} ${partida.local ? '• ' + partida.local : ''}</div>
+            <div class="text-xs text-gray-600">${partida.status_display || ''}</div>
+        `;
+        partidasDiv.appendChild(card);
+    });
+}
+function mudarRodada(delta) {
+    rodadaAtual = (rodadaAtual + delta + rodadas.length) % rodadas.length;
+    renderRodada();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    // Exibir a aba Rodadas por padrão ao abrir a página
+    showTab('rodadas');
+    const dataScript = document.getElementById('rodadas-data');
+    if (dataScript && dataScript.textContent.trim()) {
+        try {
+            rodadas = JSON.parse(dataScript.textContent);
+            console.log('Rodadas carregadas:', rodadas);
+        } catch (e) {
+            console.error('Erro ao fazer parse do JSON de rodadas:', e);
+            rodadas = [];
+        }
+    } else {
+        console.warn('Nenhum dado de rodadas encontrado no script rodadas-data.');
+    }
+    renderRodada();
+    const prevBtn = document.getElementById('rodada-prev');
+    const nextBtn = document.getElementById('rodada-next');
+    if (prevBtn) prevBtn.onclick = function() { mudarRodada(-1); };
+    if (nextBtn) nextBtn.onclick = function() { mudarRodada(1); };
+});
+{% endblock %}

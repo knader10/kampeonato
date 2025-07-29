@@ -1,0 +1,113 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}{{ campeonato.nome }} - Detalhes{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold text-gray-800">{{ campeonato.nome }}</h1>
+    <div class="space-x-2">
+        <a href="{% url 'campeonato:campeonato_update' campeonato.id %}" class="btn btn-primary">
+            <i class="bi bi-pencil me-2"></i> Editar
+        </a>
+        <a href="{% url 'campeonato:campeonatos_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2 text-2xl text-blue-700 font-bold drop-shadow-sm transition-all duration-200 hover:text-blue-900 hover:scale-110"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-medium text-gray-900">Informações do Campeonato</h3>
+            </div>
+            <div class="card-body">
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Nome</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.nome }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Edição</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.edicao|default:"-" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Organizador</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.organizador|default:"-" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="text-sm text-gray-900">
+                            {% if campeonato.status == 'nao_iniciado' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    Não iniciado
+                                </span>
+                            {% elif campeonato.status == 'em_andamento' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    Em andamento
+                                </span>
+                            {% elif campeonato.status == 'finalizado' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Finalizado
+                                </span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Formato</dt>
+                        <dd class="text-sm text-gray-900">
+                            {% if campeonato.tipo_formato == 'liga' %}Liga
+                            {% elif campeonato.tipo_formato == 'mata_mata' %}Mata-mata
+                            {% elif campeonato.tipo_formato == 'misto' %}Misto
+                            {% else %}{{ campeonato.tipo_formato|capfirst }}
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Data de Início</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.data_inicio|date:"d/m/Y"|default:"-" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Data de Término</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.data_fim|date:"d/m/Y"|default:"Não definida" }}</dd>
+                    </div>
+                    {% if campeonato.tipo_formato == 'misto' %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Número de Grupos</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.num_grupos|default:"0" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Classificados por Grupo</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.num_classificados|default:"0" }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if campeonato.observacoes_formato %}
+                    <div class="md:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Observações do Formato</dt>
+                        <dd class="text-sm text-gray-900">{{ campeonato.observacoes_formato }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-medium text-gray-900">Ações</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-3">
+                    <a href="{% url 'campeonato:campeonato_gerenciar' campeonato.id %}" class="btn btn-primary w-full text-center inline-block no-underline">
+                        <i class="bi bi-gear me-2"></i> Gerenciar Campeonato
+                    </a>
+                    <a href="{% url 'campeonato:campeonato_delete' campeonato.id %}" class="btn btn-danger w-full text-center inline-block no-underline">
+                        <i class="bi bi-trash me-2"></i> Excluir Campeonato
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

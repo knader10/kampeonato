@@ -1,0 +1,171 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}{{ title }} - Kampeonato{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center">
+            {% if campeonato_id %}
+                <a href="{% url 'campeonato:campeonato_gerenciar' campeonato_id %}" class="text-blue-600 hover:text-blue-800 mr-4">
+                    <i class="bi bi-arrow-left text-2xl text-blue-700 font-bold drop-shadow-sm transition-all duration-200 hover:text-blue-900 hover:scale-110"></i>
+                </a>
+            {% else %}
+                <a href="{% url 'campeonato:dashboard' %}" class="text-blue-600 hover:text-blue-800 mr-4">
+                    <i class="bi bi-arrow-left text-2xl text-blue-700 font-bold drop-shadow-sm transition-all duration-200 hover:text-blue-900 hover:scale-110"></i>
+                </a>
+            {% endif %}
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+                <p class="text-gray-600 mt-1">Preencha as informações do profissional</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible mb-6" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulário -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                <i class="bi bi-person-badge text-blue-600 mr-2"></i>
+                Dados do Profissional
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if campeonato_id %}
+                    <input type="hidden" name="campeonato" value="{{ campeonato_id }}">
+                {% endif %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nome -->
+                    <div class="md:col-span-2">
+                        <label for="{{ form.nome.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nome *
+                        </label>
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.nome.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- CPF -->
+                    <div>
+                        <label for="{{ form.cpf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            CPF
+                        </label>
+                        {{ form.cpf }}
+                        {% if form.cpf.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.cpf.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Telefone -->
+                    <div>
+                        <label for="{{ form.telefone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Telefone
+                        </label>
+                        {{ form.telefone }}
+                        {% if form.telefone.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.telefone.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Cidade -->
+                    <div>
+                        <label for="{{ form.cidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Cidade *
+                        </label>
+                        {{ form.cidade }}
+                        {% if form.cidade.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.cidade.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Federação -->
+                    <div>
+                        <label for="{{ form.federacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Federação *
+                        </label>
+                        {{ form.federacao }}
+                        {% if form.federacao.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.federacao.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Liga -->
+                    <div class="md:col-span-2">
+                        <label for="{{ form.liga.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Liga *
+                        </label>
+                        {{ form.liga }}
+                        {% if form.liga.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.liga.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Chave PIX -->
+                    <div>
+                        <label for="{{ form.chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Chave PIX
+                        </label>
+                        {{ form.chave_pix }}
+                        {% if form.chave_pix.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.chave_pix.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Tipo Chave PIX -->
+                    <div>
+                        <label for="{{ form.tipo_chave_pix.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tipo da Chave PIX
+                        </label>
+                        {{ form.tipo_chave_pix }}
+                        {% if form.tipo_chave_pix.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.tipo_chave_pix.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                    {% if campeonato_id %}
+                        <a href="{% url 'campeonato:campeonato_gerenciar' campeonato_id %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle mr-1"></i> Cancelar
+                        </a>
+                    {% else %}
+                        <a href="{% url 'campeonato:dashboard' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle mr-1"></i> Cancelar
+                        </a>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle mr-1"></i> Salvar Profissional
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Aplicar classes CSS aos campos do formulário
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aplicar classes aos campos de input
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], textarea, select');
+        inputs.forEach(input => {
+            input.classList.add('w-full', 'px-3', 'py-2', 'border', 'border-gray-300', 'rounded-md', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
+        });
+    });
+</script>
+{% endblock %}

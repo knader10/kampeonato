@@ -1,0 +1,289 @@
+
+{% extends 'adminpanel/base.html' %}
+{% load tem_plano_ativo %}
+
+{% block title %}Jogadores - Kampeonato{% endblock %}
+
+{% block extra_css %}
+<style>
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .search-form {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .search-form:focus-within {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-800">Jogadores</h1>
+        <p class="text-sm text-gray-600 mt-1">
+            {{ total_count }} jogador{{ total_count|pluralize }} encontrado{{ total_count|pluralize }}
+            {% if search_query %}
+                para "{{ search_query }}"
+            {% endif %}
+        </p>
+    </div>
+    {% if tem_plano_ativo %}
+        <a href="{% url 'campeonato:jogador_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus me-2"></i> Novo Jogador
+        </a>
+    {% else %}
+        <button class="btn btn-primary opacity-50 cursor-not-allowed" disabled title="Disponível apenas para assinantes">
+            <i class="bi bi-plus me-2"></i> Novo Jogador
+        </button>
+    {% endif %}
+</div>
+
+<!-- Caixa de Pesquisa -->
+<div class="mb-6">
+    <form method="get" class="flex gap-3 search-form">
+        <div class="flex-1 relative">
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ search_query }}" 
+                placeholder="Pesquisar por nome, cidade, logradouro ou bairro..." 
+                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="bi bi-search text-gray-400"></i>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary px-6 transition-all duration-200">
+            <i class="bi bi-search me-2"></i> Buscar
+        </button>
+        {% if search_query %}
+            <a href="{% url 'campeonato:jogadores_list' %}" class="btn btn-secondary px-6 transition-all duration-200">
+                <i class="bi bi-x-circle me-2"></i> Limpar
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if jogadores %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vínculos Ativos</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Nascimento</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for jogador in jogadores %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    {% if jogador.foto %}
+                                        <img src="{{ jogador.foto.url }}" alt="{{ jogador.nome }}" class="h-8 w-8 rounded-full mr-3">
+                                    {% else %}
+                                        <div class="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                            <i class="bi bi-person text-gray-500"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="text-sm font-medium text-gray-900">{{ jogador.nome }}</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% with vinculos_ativos=jogador.historico.all %}
+                                    {% if vinculos_ativos %}
+                                        {% for vinculo in vinculos_ativos %}
+                                            {% if vinculo.ativo %}
+                                                <div class="text-sm text-gray-900 mb-1">
+                                                    <span class="font-medium">{{ vinculo.time_campeonato.time.nome }}</span>
+                                                    <div class="text-xs text-gray-500">{{ vinculo.time_campeonato.campeonato.nome }}</div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-sm text-gray-500">Sem vínculos</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ jogador.data_nascimento|date:"d/m/Y" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ jogador.cidade }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{% url 'campeonato:jogador_detail' jogador.id %}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <a href="{% url 'campeonato:jogador_update' jogador.id %}" class="text-green-600 hover:text-green-900 mr-3">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <a href="{% url 'campeonato:jogador_delete' jogador.id %}" class="text-red-600 hover:text-red-900">
+                                    <i class="bi bi-trash"></i> Excluir
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginação -->
+            {% if page_obj.has_other_pages %}
+                <div class="mt-6 flex items-center justify-between border-t border-gray-200 pt-6">
+                    <div class="flex flex-1 justify-between sm:hidden">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn btn-secondary">Anterior</a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn btn-secondary">Próximo</a>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Mostrando 
+                                <span class="font-medium">{{ page_obj.start_index }}</span>
+                                a 
+                                <span class="font-medium">{{ page_obj.end_index }}</span>
+                                de 
+                                <span class="font-medium">{{ page_obj.paginator.count }}</span>
+                                resultados
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <span class="relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">{{ num }}</span>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">{{ num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-8">
+                <i class="bi bi-people text-6xl text-gray-300 mb-4"></i>
+                {% if search_query %}
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum jogador encontrado</h3>
+                    <p class="text-gray-500 mb-4">Não encontramos jogadores que correspondam à sua pesquisa "{{ search_query }}".</p>
+                    <a href="{% url 'campeonato:jogadores_list' %}" class="btn btn-secondary mr-3">
+                        <i class="bi bi-arrow-left me-2"></i> Ver Todos
+                    </a>
+                {% else %}
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum jogador cadastrado</h3>
+                    <p class="text-gray-500 mb-4">Comece criando seu primeiro jogador.</p>
+                {% endif %}
+                <a href="{% url 'campeonato:jogador_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus me-2"></i> {% if search_query %}Novo Jogador{% else %}Criar Primeiro Jogador{% endif %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Melhorar UX da pesquisa
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="search"]');
+        const searchForm = searchInput?.closest('form');
+        const searchButton = searchForm?.querySelector('button[type="submit"]');
+        
+        if (searchInput && searchForm && searchButton) {
+            // Auto-focar no campo de pesquisa se estiver vazio
+            if (!searchInput.value.trim()) {
+                searchInput.focus();
+            }
+            
+            // Adicionar indicador de carregamento
+            function showLoading() {
+                const originalText = searchButton.innerHTML;
+                searchButton.innerHTML = '<i class="bi bi-hourglass-split me-2 animate-spin"></i> Buscando...';
+                searchButton.disabled = true;
+                
+                // Restaurar após um tempo (caso algo dê errado)
+                setTimeout(() => {
+                    searchButton.innerHTML = originalText;
+                    searchButton.disabled = false;
+                }, 5000);
+            }
+            
+            // Permitir pesquisa com Enter
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    showLoading();
+                    this.form.submit();
+                }
+            });
+            
+            // Mostrar loading no clique do botão
+            searchButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                showLoading();
+                searchForm.submit();
+            });
+            
+            // Limpar pesquisa com Escape
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && this.value.trim()) {
+                    this.value = '';
+                    showLoading();
+                    this.form.submit();
+                }
+            });
+            
+            // Auto-pesquisa após 1.5 segundos de pausa (debounce)
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    if (this.value.length >= 3 || this.value.length === 0) {
+                        showLoading();
+                        this.form.submit();
+                    }
+                }, 1500);
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,511 @@
+<!-- Aba Geral -->
+<div class="space-y-6">
+    <!-- Resumo do Campeonato -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-700 to-blue-800 px-6 py-4">
+            <h2 class="font-semibold text-lg text-white flex items-center">
+                <i class="bi bi-trophy mr-3"></i>Resumo do Campeonato
+            </h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <i class="bi bi-shield text-blue-600 text-3xl mb-2"></i>
+                        <div class="text-2xl font-bold text-gray-800">{{ times_campeonato|length }}</div>
+                        <div class="text-sm text-gray-500">Times Participantes</div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <i class="bi bi-people text-green-600 text-3xl mb-2"></i>
+                        <div class="text-2xl font-bold text-gray-800">{{ total_jogadores }}</div>
+                        <div class="text-sm text-gray-500">Jogadores Inscritos</div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="bg-orange-50 rounded-lg p-4">
+                        <i class="bi bi-calendar-event text-orange-600 text-3xl mb-2"></i>
+                        <div class="text-2xl font-bold text-gray-800">{{ rodadas_campeonato|length }}</div>
+                        <div class="text-sm text-gray-500">Rodadas</div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <i class="bi bi-trophy text-purple-600 text-3xl mb-2"></i>
+                        <div class="text-2xl font-bold text-gray-800">{{ campeonato.get_tipo_formato_display }}</div>
+                        <div class="text-sm text-gray-500">Formato</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Principal: Classificação e Estatísticas -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Classificação -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-green-700 to-green-800 px-6 py-4 flex justify-between items-center">
+                    <h3 class="font-semibold text-lg text-white flex items-center">
+                        <i class="bi bi-list-ol mr-3"></i>Classificação
+                        {% if campeonato.tipo_formato == 'misto' and campeonato.num_grupos > 1 %}
+                            <span class="ml-2 text-green-200 text-sm">(Geral)</span>
+                        {% endif %}
+                    </h3>
+                    {% if campeonato.tipo_formato == 'misto' and campeonato.num_grupos > 1 %}
+                        <div class="flex space-x-2">
+                            {% if campeonato.num_grupos >= 1 %}
+                                <button onclick="showClassificacao('grupo1')" id="btn-grupo1" class="bg-white text-green-700 hover:bg-green-50 px-3 py-1 rounded-lg text-sm font-medium transition-colors cursor-pointer border border-white/30">
+                                    Grupo A
+                                </button>
+                            {% endif %}
+                            {% if campeonato.num_grupos >= 2 %}
+                                <button onclick="showClassificacao('grupo2')" id="btn-grupo2" class="bg-white/20 text-white hover:bg-white/30 px-3 py-1 rounded-lg text-sm font-medium transition-colors cursor-pointer border border-white/30">
+                                    Grupo B
+                                </button>
+                            {% endif %}
+                            {% if campeonato.num_grupos >= 3 %}
+                                <button onclick="showClassificacao('grupo3')" id="btn-grupo3" class="bg-white/20 text-white hover:bg-white/30 px-3 py-1 rounded-lg text-sm font-medium transition-colors cursor-pointer border border-white/30">
+                                    Grupo C
+                                </button>
+                            {% endif %}
+                            {% if campeonato.num_grupos >= 4 %}
+                                <button onclick="showClassificacao('grupo4')" id="btn-grupo4" class="bg-white/20 text-white hover:bg-white/30 px-3 py-1 rounded-lg text-sm font-medium transition-colors cursor-pointer border border-white/30">
+                                    Grupo D
+                                </button>
+                            {% endif %}
+                            <button onclick="showClassificacao('geral')" id="btn-geral" class="bg-white/20 text-white hover:bg-white/30 px-3 py-1 rounded-lg text-sm font-medium transition-colors cursor-pointer border border-white/30">
+                                Geral
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="p-6">
+                    {% if classificacao_geral %}
+                        <!-- Classificação Geral -->
+                        <div id="classificacao-geral" class="classificacao-content {% if campeonato.tipo_formato == 'misto' and campeonato.num_grupos > 1 %}hidden{% endif %}">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
+                                            <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Time</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">J</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">V</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">E</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">D</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">GP</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">GC</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">SG</th>
+                                            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider font-bold">PTS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        {% for item in classificacao_geral %}
+                                            <tr class="hover:bg-gray-50 transition-colors
+                                                {% if campeonato.tipo_formato == 'misto' and forloop.counter <= campeonato.num_classificados %}
+                                                    bg-green-50 border-l-4 border-green-500
+                                                {% elif campeonato.tipo_formato == 'liga' and forloop.counter <= 4 %}
+                                                    {% if forloop.counter == 1 %}
+                                                        bg-yellow-50 border-l-4 border-yellow-500
+                                                    {% elif forloop.counter <= 3 %}
+                                                        bg-green-50 border-l-4 border-green-500
+                                                    {% else %}
+                                                        bg-blue-50 border-l-4 border-blue-500
+                                                    {% endif %}
+                                                {% endif %}
+                                            ">
+                                                <td class="py-3 px-2 text-sm font-medium text-gray-800">
+                                                    <div class="flex items-center">
+                                                        {{ forloop.counter }}
+                                                        {% if forloop.counter == 1 %}
+                                                            <i class="bi bi-trophy-fill text-yellow-500 ml-1"></i>
+                                                        {% elif forloop.counter <= 3 %}
+                                                            <i class="bi bi-award-fill text-gray-400 ml-1"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                                <td class="py-3 px-4">
+                                                    <div class="flex items-center">
+                                                        {% if item.time.escudo %}
+                                                            <img src="{{ item.time.escudo.url }}" alt="{{ item.time.nome }}" class="h-8 w-8 rounded-full mr-3">
+                                                        {% else %}
+                                                            <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                                                <i class="bi bi-shield text-gray-400 text-sm"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                        <div>
+                                                            <div class="text-sm font-medium text-gray-900">{{ item.time.nome }}</div>
+                                                            {% if campeonato.tipo_formato == 'misto' %}
+                                                                <div class="text-xs text-gray-500">Grupo {{ item.grupo|upper }}</div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="py-3 px-2 text-center text-sm text-gray-900">{{ item.jogos }}</td>
+                                                <td class="py-3 px-2 text-center text-sm text-green-600 font-medium">{{ item.vitorias }}</td>
+                                                <td class="py-3 px-2 text-center text-sm text-yellow-600">{{ item.empates }}</td>
+                                                <td class="py-3 px-2 text-center text-sm text-red-600">{{ item.derrotas }}</td>
+                                                <td class="py-3 px-2 text-center text-sm text-gray-900">{{ item.gols_pro }}</td>
+                                                <td class="py-3 px-2 text-center text-sm text-gray-900">{{ item.gols_contra }}</td>
+                                                <td class="py-3 px-2 text-center text-sm font-medium
+                                                    {% if item.saldo_gols > 0 %}text-green-600{% elif item.saldo_gols < 0 %}text-red-600{% else %}text-gray-900{% endif %}
+                                                ">
+                                                    {% if item.saldo_gols > 0 %}+{% endif %}{{ item.saldo_gols }}
+                                                </td>
+                                                <td class="py-3 px-2 text-center text-sm font-bold text-gray-900">{{ item.pontos }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Classificações por Grupo (se misto) -->
+                        {% if campeonato.tipo_formato == 'misto' and campeonato.num_grupos > 1 %}
+                            {% for grupo in classificacao_grupos %}
+                                <div id="classificacao-grupo{{ forloop.counter }}" class="classificacao-content {% if not forloop.first %}hidden{% endif %}">
+                                    <div class="mb-4">
+                                        <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                            <i class="bi bi-collection mr-2"></i>Grupo {{ grupo.numero }}
+                                            <span class="ml-2 text-sm font-normal text-gray-500">
+                                                ({{ grupo.classificados }} classificados)
+                                            </span>
+                                        </h4>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full">
+                                            <thead>
+                                                <tr class="border-b border-gray-200">
+                                                    <th class="text-left py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
+                                                    <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Time</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">J</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">V</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">E</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">D</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">GP</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">GC</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">SG</th>
+                                                    <th class="text-center py-3 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider font-bold">PTS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-100">
+                                                {% for item in grupo.times %}
+                                                    <tr class="hover:bg-gray-50 transition-colors
+                                                        {% if forloop.counter <= grupo.classificados %}
+                                                            bg-green-50 border-l-4 border-green-500
+                                                        {% endif %}
+                                                    ">
+                                                        <td class="py-3 px-2 text-sm font-medium text-gray-800">
+                                                            <div class="flex items-center">
+                                                                {{ forloop.counter }}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <i class="bi bi-trophy-fill text-yellow-500 ml-1"></i>
+                                                                {% elif forloop.counter <= grupo.classificados %}
+                                                                    <i class="bi bi-arrow-up-circle-fill text-green-500 ml-1"></i>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3 px-4">
+                                                            <div class="flex items-center">
+                                                                {% if item.time.escudo %}
+                                                                    <img src="{{ item.time.escudo.url }}" alt="{{ item.time.nome }}" class="h-8 w-8 rounded-full mr-3">
+                                                                {% else %}
+                                                                    <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                                                        <i class="bi bi-shield text-gray-400 text-sm"></i>
+                                                                    </div>
+                                                                {% endif %}
+                                                                <div class="text-sm font-medium text-gray-900">{{ item.time.nome }}</div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3 px-2 text-center text-sm text-gray-900">{{ item.jogos }}</td>
+                                                        <td class="py-3 px-2 text-center text-sm text-green-600 font-medium">{{ item.vitorias }}</td>
+                                                        <td class="py-3 px-2 text-center text-sm text-yellow-600">{{ item.empates }}</td>
+                                                        <td class="py-3 px-2 text-center text-sm text-red-600">{{ item.derrotas }}</td>
+                                                        <td class="py-3 px-2 text-center text-sm text-gray-900">{{ item.gols_pro }}</td>
+                                                        <td class="py-3 px-2 text-center text-sm text-gray-900">{{ item.gols_contra }}</td>
+                                                        <td class="py-3 px-2 text-center text-sm font-medium
+                                                            {% if item.saldo_gols > 0 %}text-green-600{% elif item.saldo_gols < 0 %}text-red-600{% else %}text-gray-900{% endif %}
+                                                        ">
+                                                            {% if item.saldo_gols > 0 %}+{% endif %}{{ item.saldo_gols }}
+                                                        </td>
+                                                        <td class="py-3 px-2 text-center text-sm font-bold text-gray-900">{{ item.pontos }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="mx-auto h-24 w-24 text-gray-400 flex items-center justify-center rounded-full bg-gray-100">
+                                <i class="bi bi-list-ol text-5xl"></i>
+                            </div>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Classificação não disponível</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% if rodadas_campeonato|length == 0 %}
+                                    Gere as rodadas para visualizar a classificação.
+                                {% else %}
+                                    Aguarde o início das partidas.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas Individuais -->
+        <div class="space-y-6">
+            <!-- Artilharia -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-red-700 to-red-800 px-6 py-4">
+                    <h3 class="font-semibold text-lg text-white flex items-center">
+                        <i class="bi bi-trophy mr-3"></i>Artilharia
+                    </h3>
+                </div>
+                <div class="p-6">
+                    {% if artilharia %}
+                        <div class="space-y-3">
+                            {% for item in artilharia|slice:":5" %}
+                                <div class="flex items-center justify-between p-3 rounded-lg
+                                    {% if forloop.counter == 1 %}bg-yellow-50 border border-yellow-200{% else %}bg-gray-50{% endif %}
+                                ">
+                                    <div class="flex items-center">
+                                        <div class="text-lg font-bold text-gray-500 mr-3 w-6">{{ forloop.counter }}º</div>
+                                        {% if item.jogador.foto %}
+                                            <img src="{{ item.jogador.foto.url }}" alt="{{ item.jogador.nome }}" class="h-10 w-10 rounded-full mr-3">
+                                        {% else %}
+                                            <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                                <i class="bi bi-person text-gray-400"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ item.jogador.nome }}</div>
+                                            <div class="text-sm text-gray-500">{{ item.time.nome }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="text-xl font-bold text-red-600">{{ item.gols }}</span>
+                                        <i class="bi bi-record-circle-fill text-red-500 ml-2"></i>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="bi bi-trophy text-4xl mb-2"></i>
+                            <p>Nenhum gol registrado ainda</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Assistências -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-700 to-blue-800 px-6 py-4">
+                    <h3 class="font-semibold text-lg text-white flex items-center">
+                        <i class="bi bi-hand-thumbs-up mr-3"></i>Assistências
+                    </h3>
+                </div>
+                <div class="p-6">
+                    {% if assistencias %}
+                        <div class="space-y-3">
+                            {% for item in assistencias|slice:":3" %}
+                                <div class="flex items-center justify-between p-3 rounded-lg
+                                    {% if forloop.counter == 1 %}bg-blue-50 border border-blue-200{% else %}bg-gray-50{% endif %}
+                                ">
+                                    <div class="flex items-center">
+                                        <div class="text-lg font-bold text-gray-500 mr-3 w-6">{{ forloop.counter }}º</div>
+                                        {% if item.jogador.foto %}
+                                            <img src="{{ item.jogador.foto.url }}" alt="{{ item.jogador.nome }}" class="h-10 w-10 rounded-full mr-3">
+                                        {% else %}
+                                            <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                                <i class="bi bi-person text-gray-400"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ item.jogador.nome }}</div>
+                                            <div class="text-sm text-gray-500">{{ item.time.nome }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="text-xl font-bold text-blue-600">{{ item.assistencias }}</span>
+                                        <i class="bi bi-hand-thumbs-up-fill text-blue-500 ml-2"></i>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-6 text-gray-500">
+                            <i class="bi bi-hand-thumbs-up text-4xl mb-2"></i>
+                            <p>Nenhuma assistência registrada ainda</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Cartões -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-yellow-600 to-red-700 px-6 py-4">
+                    <h3 class="font-semibold text-lg text-white flex items-center">
+                        <i class="bi bi-card-text mr-3"></i>Cartões
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <!-- Cartões Amarelos -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-semibold text-yellow-600 mb-2 flex items-center">
+                            <i class="bi bi-square-fill text-yellow-500 mr-2"></i>Amarelos
+                        </h4>
+                        {% if cartoes_amarelos %}
+                            <div class="space-y-2">
+                                {% for item in cartoes_amarelos|slice:":3" %}
+                                    <div class="flex items-center justify-between text-sm p-2 bg-yellow-50 rounded">
+                                        <div class="flex items-center">
+                                            <span class="font-medium text-gray-900">{{ item.jogador.nome }}</span>
+                                            <span class="text-gray-500 ml-2">{{ item.time.nome }}</span>
+                                        </div>
+                                        <span class="font-bold text-yellow-600">{{ item.cartoes }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-gray-500">Nenhum cartão amarelo</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Cartões Vermelhos -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-red-600 mb-2 flex items-center">
+                            <i class="bi bi-square-fill text-red-500 mr-2"></i>Vermelhos
+                        </h4>
+                        {% if cartoes_vermelhos %}
+                            <div class="space-y-2">
+                                {% for item in cartoes_vermelhos|slice:":3" %}
+                                    <div class="flex items-center justify-between text-sm p-2 bg-red-50 rounded">
+                                        <div class="flex items-center">
+                                            <span class="font-medium text-gray-900">{{ item.jogador.nome }}</span>
+                                            <span class="text-gray-500 ml-2">{{ item.time.nome }}</span>
+                                        </div>
+                                        <span class="font-bold text-red-600">{{ item.cartoes }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-gray-500">Nenhum cartão vermelho</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legenda da Classificação -->
+    {% if classificacao_geral %}
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4">
+                <h3 class="font-semibold text-lg text-white flex items-center">
+                    <i class="bi bi-info-circle mr-3"></i>Legenda
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% if campeonato.tipo_formato == 'liga' %}
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                            <span class="text-sm text-gray-700">Campeão</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-gray-400 rounded mr-2"></div>
+                            <span class="text-sm text-gray-700">Vice-Campeão</span>
+                        </div>
+                    {% elif campeonato.tipo_formato == 'misto' %}
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                            <span class="text-sm text-gray-700">Classificados ({{ campeonato.num_classificados }})</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                            <span class="text-sm text-gray-700">Líder do Grupo</span>
+                        </div>
+                    {% endif %}
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">J:</span>
+                        <span class="text-sm text-gray-700">Jogos</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">V:</span>
+                        <span class="text-sm text-gray-700">Vitórias</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">E:</span>
+                        <span class="text-sm text-gray-700">Empates</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">D:</span>
+                        <span class="text-sm text-gray-700">Derrotas</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">GP:</span>
+                        <span class="text-sm text-gray-700">Gols Pró</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">GC:</span>
+                        <span class="text-sm text-gray-700">Gols Contra</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">SG:</span>
+                        <span class="text-sm text-gray-700">Saldo de Gols</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 font-medium mr-2">PTS:</span>
+                        <span class="text-sm text-gray-700">Pontos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+// Função para alternar entre classificação geral e por grupos
+function showClassificacao(tipo) {
+    // Esconder todos os conteúdos de classificação
+    document.querySelectorAll('.classificacao-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remover classe ativa de todos os botões e resetar para estado inativo
+    document.querySelectorAll('[id^="btn-"]').forEach(button => {
+        button.classList.remove('bg-white', 'text-green-700', 'hover:bg-green-50');
+        button.classList.add('bg-white/20', 'text-white', 'hover:bg-white/30');
+    });
+    
+    // Mostrar o conteúdo selecionado
+    const content = document.getElementById('classificacao-' + tipo);
+    if (content) {
+        content.classList.remove('hidden');
+    }
+    
+    // Ativar o botão selecionado
+    const button = document.getElementById('btn-' + tipo);
+    if (button) {
+        button.classList.remove('bg-white/20', 'text-white', 'hover:bg-white/30');
+        button.classList.add('bg-white', 'text-green-700', 'hover:bg-green-50');
+    }
+}
+
+// Inicializar com o primeiro grupo ativo para formato misto
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar se é formato misto com múltiplos grupos
+    const isFormatoMisto = document.querySelector('#btn-grupo1') !== null;
+    if (isFormatoMisto) {
+        // Por padrão, mostrar o Grupo A
+        showClassificacao('grupo1');
+    }
+});
+</script>

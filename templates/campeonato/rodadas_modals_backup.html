@@ -1,0 +1,266 @@
+{% load i18n %}
+
+<!-- Modal para editar rodada -->
+<div class="modal fade" id="editarRodadaModal" tabindex="-1" aria-labelledby="editarRodadaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarRodadaModalLabel">
+                    <i class="bi bi-calendar-event text-blue-600 mr-2"></i>
+                    {% trans "Edit Round" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editarRodadaForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="rodadaId" name="rodada_id">
+                    
+                    <div class="mb-3">
+                        <label for="rodadaNome" class="form-label">{% trans "Round Name" %}</label>
+                        <input type="text" class="form-control" id="rodadaNome" name="nome" placeholder="Ex: Round 1, Semifinal, Final">
+                        <div class="form-text">{% trans "Leave empty to use automatic naming" %}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="rodadaData" class="form-label">{% trans "Date" %}</label>
+                        <input type="date" class="form-control" id="rodadaData" name="data">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="rodadaObservacoes" class="form-label">{% trans "Notes" %}</label>
+                        <textarea class="form-control" id="rodadaObservacoes" name="observacoes" rows="3" placeholder="{% trans 'Additional information about this round...' %}"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" onclick="salvarRodada()">
+                    <i class="bi bi-check-lg mr-2"></i>{% trans "Save Changes" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para gerenciar partida -->
+<div class="modal fade" id="gerenciarPartidaModal" tabindex="-1" aria-labelledby="gerenciarPartidaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gerenciarPartidaModalLabel">
+                    <i class="bi bi-gear text-blue-600 mr-2"></i>
+                    {% trans "Manage Match" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="gerenciarPartidaForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="partidaId" name="partida_id">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">{% trans "Match Information" %}</h6>
+                            
+                            <div class="mb-3">
+                                <label for="partidaDataHora" class="form-label">{% trans "Date and Time" %}</label>
+                                <input type="datetime-local" class="form-control" id="partidaDataHora" name="data_hora">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="partidaLocal" class="form-label">{% trans "Venue" %}</label>
+                                <input type="text" class="form-control" id="partidaLocal" name="local" placeholder="{% trans 'Stadium, City' %}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="partidaStatus" class="form-label">{% trans "Status" %}</label>
+                                <select class="form-select" id="partidaStatus" name="status">
+                                    <option value="nao_iniciada">{% trans "Not Started" %}</option>
+                                    <option value="em_andamento">{% trans "In Progress" %}</option>
+                                    <option value="finalizada">{% trans "Finished" %}</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">{% trans "Score" %}</h6>
+                            
+                            <div class="row align-items-center mb-3">
+                                <div class="col-4">
+                                    <div class="text-center">
+                                        <div id="timeMandanteInfo" class="mb-2">
+                                            <img id="timeMandanteEscudo" class="rounded-circle" style="width: 40px; height: 40px;" alt="">
+                                            <div id="timeMandanteNome" class="fw-bold"></div>
+                                        </div>
+                                        <input type="number" class="form-control text-center" id="placarMandante" name="placar_mandante" min="0" value="0">
+                                    </div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <h3 class="text-muted">X</h3>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-center">
+                                        <div id="timeVisitanteInfo" class="mb-2">
+                                            <img id="timeVisitanteEscudo" class="rounded-circle" style="width: 40px; height: 40px;" alt="">
+                                            <div id="timeVisitanteNome" class="fw-bold"></div>
+                                        </div>
+                                        <input type="number" class="form-control text-center" id="placarVisitante" name="placar_visitante" min="0" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="partidaObservacoes" class="form-label">{% trans "Match Notes" %}</label>
+                        <textarea class="form-control" id="partidaObservacoes" name="observacoes" rows="3" placeholder="{% trans 'Events, observations, important notes...' %}"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" onclick="salvarPartida()">
+                    <i class="bi bi-check-lg mr-2"></i>{% trans "Save Match" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções para os modais
+function editarRodada(rodadaId) {
+    // Buscar dados da rodada via AJAX
+    fetch(`{% url 'campeonato:rodada_detail' 0 %}`.replace('0', rodadaId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('rodadaId').value = rodadaId;
+                document.getElementById('rodadaNome').value = data.rodada.nome || '';
+                document.getElementById('rodadaData').value = data.rodada.data || '';
+                document.getElementById('rodadaObservacoes').value = data.rodada.observacoes || '';
+                
+                const modal = new bootstrap.Modal(document.getElementById('editarRodadaModal'));
+                modal.show();
+            } else {
+                showAlert('error', '{% trans "Error loading round data" %}');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('error', '{% trans "Error loading round data" %}');
+        });
+}
+
+function gerenciarPartida(partidaId) {
+    // Buscar dados da partida via AJAX
+    fetch(`{% url 'campeonato:partida_detail' 0 %}`.replace('0', partidaId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const partida = data.partida;
+                
+                document.getElementById('partidaId').value = partidaId;
+                document.getElementById('partidaDataHora').value = partida.data_hora || '';
+                document.getElementById('partidaLocal').value = partida.local || '';
+                document.getElementById('partidaStatus').value = partida.status || 'nao_iniciada';
+                document.getElementById('placarMandante').value = partida.placar_mandante || 0;
+                document.getElementById('placarVisitante').value = partida.placar_visitante || 0;
+                document.getElementById('partidaObservacoes').value = partida.observacoes || '';
+                
+                // Preencher informações dos times
+                if (partida.time_mandante) {
+                    document.getElementById('timeMandanteNome').textContent = partida.time_mandante.nome;
+                    document.getElementById('timeMandanteEscudo').src = partida.time_mandante.escudo || '/static/img/default_team.png';
+                }
+                
+                if (partida.time_visitante) {
+                    document.getElementById('timeVisitanteNome').textContent = partida.time_visitante.nome;
+                    document.getElementById('timeVisitanteEscudo').src = partida.time_visitante.escudo || '/static/img/default_team.png';
+                }
+                
+                const modal = new bootstrap.Modal(document.getElementById('gerenciarPartidaModal'));
+                modal.show();
+            } else {
+                showAlert('error', '{% trans "Error loading match data" %}');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('error', '{% trans "Error loading match data" %}');
+        });
+}
+
+function salvarRodada() {
+    const form = document.getElementById('editarRodadaForm');
+    const formData = new FormData(form);
+    
+    const rodadaId = document.getElementById('rodadaId').value;
+    
+    fetch(`{% url 'campeonato:rodada_update' 0 %}`.replace('0', rodadaId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', '{% trans "Round updated successfully!" %}');
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editarRodadaModal'));
+            modal.hide();
+            
+            // Recarregar página após um delay
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showAlert('error', data.error || '{% trans "Error updating round" %}');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', '{% trans "Error updating round" %}');
+    });
+}
+
+function salvarPartida() {
+    const form = document.getElementById('gerenciarPartidaForm');
+    const formData = new FormData(form);
+    
+    const partidaId = document.getElementById('partidaId').value;
+    
+    fetch(`{% url 'campeonato:partida_update' 0 %}`.replace('0', partidaId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', '{% trans "Match updated successfully!" %}');
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('gerenciarPartidaModal'));
+            modal.hide();
+            
+            // Recarregar página após um delay
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showAlert('error', data.error || '{% trans "Error updating match" %}');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', '{% trans "Error updating match" %}');
+    });
+}
+</script>

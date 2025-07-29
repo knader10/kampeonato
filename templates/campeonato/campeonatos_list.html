@@ -1,0 +1,156 @@
+
+{% extends 'adminpanel/base.html' %}
+{% load tem_plano_ativo %}
+
+{% block title %}Campeonatos - Kampeonato{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold text-gray-800">Campeonatos</h1>
+    {% if tem_plano_ativo %}
+        <a href="{% url 'campeonato:campeonato_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus me-2"></i> Novo Campeonato
+        </a>
+    {% else %}
+        <button class="btn btn-primary opacity-50 cursor-not-allowed" disabled title="Disponível apenas para assinantes">
+            <i class="bi bi-plus me-2"></i> Novo Campeonato
+        </button>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if campeonatos %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edição</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Início</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for campeonato in campeonatos %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ campeonato.nome }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ campeonato.edicao|default:"-" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ campeonato.data_inicio|date:"d/m/Y"|default:"-" }}</div>
+                            </td>
+<td class="px-6 py-4 whitespace-nowrap">
+    {% if campeonato.status == 'finalizado' %}
+        <span class="badge badge-dark">Finalizado</span>
+    {% elif campeonato.status == 'em_andamento' %}
+        <span class="badge badge-success">Ativo</span>
+    {% else %}
+        <span class="badge badge-secondary">Inativo</span>
+    {% endif %}
+</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{% url 'campeonato:campeonato_gerenciar' campeonato.id %}" class="text-green-600 hover:text-green-900 mr-3">
+                                    <i class="bi bi-gear"></i> Gerenciar
+                                </a>
+                                <a href="{% url 'campeonato:campeonato_detail' campeonato.id %}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <a href="{% url 'campeonato:campeonato_update' campeonato.id %}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <a href="{% url 'campeonato:noticias_midia' campeonato.id %}" class="text-purple-600 hover:text-purple-800 mr-3">
+                                    <i class="bi bi-megaphone"></i> Notícias e Mídia
+                                </a>
+                                <button type="button" class="text-red-600 hover:text-red-900 cursor-pointer" onclick="abrirModalExcluir({{ campeonato.id }}, '{{ campeonato.nome|escapejs }}', {% if campeonato.status == 'finalizado' %}1{% else %}0{% endif %})">
+                                    <i class="bi bi-trash"></i> Excluir
+                                </button>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                {% if campeonato.codigo_publico %}
+                                <a href="/c/{{ campeonato.codigo_publico }}/" target="_blank" class="text-indigo-600 hover:text-indigo-900">
+                                    <i class="bi bi-link-45deg"></i> Link
+                                </a>
+                                {% else %}
+                                <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <i class="bi bi-trophy text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum campeonato cadastrado</h3>
+                <p class="text-gray-500 mb-4">Comece criando seu primeiro campeonato.</p>
+                {% if tem_plano_ativo %}
+                    <a href="{% url 'campeonato:campeonato_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus me-2"></i> Criar Primeiro Campeonato
+                    </a>
+                {% else %}
+                    <button class="btn btn-primary opacity-50 cursor-not-allowed" disabled title="Disponível apenas para assinantes">
+                        <i class="bi bi-plus me-2"></i> Criar Primeiro Campeonato
+                    </button>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal de confirmação de exclusão -->
+<div id="modal-excluir-campeonato" class="fixed inset-0 z-50 flex items-center justify-center bg-transparent hidden">
+    <div class="bg-white rounded-xl shadow-lg p-8 max-w-md w-full">
+        <h2 class="text-xl font-bold text-red-700 mb-4 flex items-center">
+            <i class="bi bi-exclamation-triangle-fill text-2xl mr-2"></i>
+            <span id="modal-titulo-excluir">Confirmar Exclusão</span>
+        </h2>
+        <div id="modal-msg-excluir">
+            <p class="mb-6 text-gray-700">Tem certeza que deseja <span class="font-semibold text-red-700">excluir</span> o campeonato <span id="modal-campeonato-nome" class="font-semibold"></span>? Esta ação não pode ser desfeita.</p>
+        </div>
+        <form id="form-excluir-campeonato" method="post" action="">
+            {% csrf_token %}
+            <div class="flex justify-end gap-4" id="modal-botoes-excluir">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalExcluir()">Cancelar</button>
+                <button type="submit" class="btn btn-danger">Excluir</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalExcluir(id, nome, finalizado) {
+    finalizado = Boolean(finalizado);
+    document.getElementById('modal-excluir-campeonato').classList.remove('hidden');
+    document.getElementById('modal-campeonato-nome').textContent = nome;
+    var form = document.getElementById('form-excluir-campeonato');
+    var botoes = document.getElementById('modal-botoes-excluir');
+    var msg = document.getElementById('modal-msg-excluir');
+    var titulo = document.getElementById('modal-titulo-excluir');
+    if (finalizado) {
+        titulo.textContent = 'Ação não permitida';
+        msg.innerHTML = '<p class="mb-6 text-gray-700">Este campeonato está <span class="font-semibold text-blue-700">finalizado</span> e não pode ser excluído.<br>Altere o status para poder excluir.</p>';
+        botoes.innerHTML = '<button type="button" class="btn btn-secondary" onclick="fecharModalExcluir()">Fechar</button>';
+        form.action = '#';
+    } else {
+        titulo.textContent = 'Confirmar Exclusão';
+        msg.innerHTML = 'Tem certeza que deseja <span class="font-semibold text-red-700">excluir</span> o campeonato <span id="modal-campeonato-nome" class="font-semibold"></span>? Esta ação não pode ser desfeita.';
+        document.getElementById('modal-campeonato-nome').textContent = nome;
+        botoes.innerHTML = '<button type="button" class="btn btn-secondary" onclick="fecharModalExcluir()">Cancelar</button> <button type="submit" class="btn btn-danger">Excluir</button>';
+        form.action = `/painel/campeonatos/${id}/deletar/`;
+    }
+}
+function fecharModalExcluir() {
+    document.getElementById('modal-excluir-campeonato').classList.add('hidden');
+}
+// Fechar modal ao apertar ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharModalExcluir();
+});
+</script>
+{% endblock %}

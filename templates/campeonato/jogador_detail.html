@@ -1,0 +1,191 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}{{ jogador.nome }} - Detalhes - Kampeonato{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center">
+            <a href="{% url 'campeonato:jogadores_list' %}" class="text-blue-600 hover:text-blue-800 mr-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </a>
+            <h1 class="text-2xl font-bold text-gray-900">{{ jogador.nome }}</h1>
+        </div>
+        
+        <div class="flex gap-3">
+            <a href="{% url 'campeonato:jogador_update' jogador.pk %}" 
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Editar
+            </a>
+        </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Foto e informações básicas -->
+                <div class="lg:col-span-1">
+                    <div class="text-center">
+                        {% if jogador.foto %}
+                            <img src="{{ jogador.foto.url }}" alt="{{ jogador.nome }}" 
+                                 class="w-48 h-48 mx-auto object-cover rounded-full border-4 border-gray-200 mb-4">
+                        {% else %}
+                            <div class="w-48 h-48 mx-auto bg-gray-200 rounded-full flex items-center justify-center border-4 border-gray-200 mb-4">
+                                <svg class="w-24 h-24 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        {% endif %}
+                        
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ jogador.nome }}</h2>
+                        
+                        {% if jogador.data_nascimento %}
+                            <p class="text-gray-600 mb-2">
+                                {{ jogador.data_nascimento|date:"d/m/Y" }}
+                                ({{ jogador.idade }} anos)
+                            </p>
+                        {% endif %}
+                        
+                        {% if jogador.telefone %}
+                            <p class="text-gray-600 mb-2">
+                                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                                </svg>
+                                {{ jogador.telefone }}
+                            </p>
+                        {% endif %}
+                        
+                        <p class="text-gray-600">
+                            <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                            </svg>
+                            {{ jogador.cidade }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Informações detalhadas -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Informações Pessoais -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                            Informações Pessoais
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Nome Completo</label>
+                                <p class="text-gray-900">{{ jogador.nome }}</p>
+                            </div>
+                            
+                            {% if jogador.data_nascimento %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Data de Nascimento</label>
+                                    <p class="text-gray-900">{{ jogador.data_nascimento|date:"d/m/Y" }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            {% if jogador.telefone %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Telefone</label>
+                                    <p class="text-gray-900">{{ jogador.telefone }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Endereço -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                            Endereço
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Cidade</label>
+                                <p class="text-gray-900">{{ jogador.cidade|default:"Não informado" }}</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">CEP</label>
+                                <p class="text-gray-900">{{ jogador.cep|default:"Não informado" }}</p>
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-500">Logradouro</label>
+                                <p class="text-gray-900">{{ jogador.logradouro|default:"Não informado" }}</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Bairro</label>
+                                <p class="text-gray-900">{{ jogador.bairro|default:"Não informado" }}</p>
+                            </div>
+                            
+                            {% if jogador.complemento %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Complemento</label>
+                                    <p class="text-gray-900">{{ jogador.complemento }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Informações Eleitorais -->
+                    {% if jogador.titulo_eleitor or jogador.zona_eleitoral or jogador.secao_eleitoral %}
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                                Informações Eleitorais
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {% if jogador.titulo_eleitor %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-500">Título de Eleitor</label>
+                                        <p class="text-gray-900">{{ jogador.titulo_eleitor }}</p>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if jogador.zona_eleitoral %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-500">Zona Eleitoral</label>
+                                        <p class="text-gray-900">{{ jogador.zona_eleitoral }}</p>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if jogador.secao_eleitoral %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-500">Seção Eleitoral</label>
+                                        <p class="text-gray-900">{{ jogador.secao_eleitoral }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer com ações -->
+        <div class="bg-gray-50 px-6 py-4 flex items-center justify-end">
+            <div class="flex gap-3">
+                <a href="{% url 'campeonato:jogador_update' jogador.pk %}" 
+                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Editar Jogador
+                </a>
+                
+                <a href="{% url 'campeonato:jogadores_list' %}" 
+                   class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                    Voltar à Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

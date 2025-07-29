@@ -1,0 +1,263 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}{% if object %}Editar{% else %}Criar{% endif %} Campeonato - Kampeonato{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold text-gray-800">
+        {% if form.instance.pk %}Editar Campeonato{% else %}Novo Campeonato{% endif %}
+    </h1>
+    <a href="{% url 'campeonato:campeonatos_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-2 text-2xl text-blue-700 font-bold drop-shadow-sm transition-all duration-200 hover:text-blue-900 hover:scale-110"></i> Voltar
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-4" role="alert">
+                <strong>Erros de validação:</strong>
+                <ul class="mb-0">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Informações Básicas -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Informações Básicas</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="{{ form.nome.id_for_label }}" class="form-label">Nome do Campeonato</label>
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.nome.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.edicao.id_for_label }}" class="form-label">Edição</label>
+                        {{ form.edicao }}
+                        {% if form.edicao.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.edicao.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.organizador.id_for_label }}" class="form-label">Organizador</label>
+                    {{ form.organizador }}
+                    {% if form.organizador.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.organizador.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="{{ form.data_inicio.id_for_label }}" class="form-label">Data de Início</label>
+                        {{ form.data_inicio }}
+                        {% if form.data_inicio.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.data_inicio.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.data_fim.id_for_label }}" class="form-label">Data de Término (opcional)</label>
+                        {{ form.data_fim }}
+                        {% if form.data_fim.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.data_fim.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Configurações</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.status.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.tipo_formato.id_for_label }}" class="form-label">Tipo de Formato</label>
+                        {{ form.tipo_formato }}
+                        {% if form.tipo_formato.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.tipo_formato.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="{{ form.num_grupos.id_for_label }}" class="form-label">Número de Grupos</label>
+                        {{ form.num_grupos }}
+                        {% if form.num_grupos.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.num_grupos.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.num_classificados.id_for_label }}" class="form-label">Classificados por Grupo</label>
+                        {{ form.num_classificados }}
+                        {% if form.num_classificados.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.num_classificados.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        {{ form.ida_volta }}
+                        <label for="{{ form.ida_volta.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                            Turno e Returno (Ida e Volta)
+                        </label>
+                        {% if form.ida_volta.errors %}
+                            <div class="text-red-600 text-sm ml-2">{{ form.ida_volta.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex items-center">
+                        {{ form.permite_transferencia }}
+                        <label for="{{ form.permite_transferencia.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                            Permite transferência de jogadores
+                        </label>
+                        {% if form.permite_transferencia.errors %}
+                            <div class="text-red-600 text-sm ml-2">{{ form.permite_transferencia.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Campo específico para formato Misto -->
+                    <div id="confrontos-mesmo-grupo" class="flex items-center" style="display: none;">
+                        {{ form.confrontos_mesmo_grupo }}
+                        <label for="{{ form.confrontos_mesmo_grupo.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                            Confrontos apenas entre times do mesmo grupo
+                        </label>
+                        {% if form.confrontos_mesmo_grupo.errors %}
+                            <div class="text-red-600 text-sm ml-2">{{ form.confrontos_mesmo_grupo.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observações -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Observações</h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.observacoes_formato.id_for_label }}" class="form-label">Observações sobre o Formato</label>
+                    {{ form.observacoes_formato }}
+                    {% if form.observacoes_formato.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.observacoes_formato.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="flex justify-between items-center pt-6 border-t">
+                <a href="{% url 'campeonato:campeonatos_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x me-2"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check me-2"></i>
+                    {% if form.instance.pk %}Atualizar{% else %}Criar{% endif %} Campeonato
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoFormatoSelect = document.getElementById('{{ form.tipo_formato.id_for_label }}');
+    const numGruposField = document.getElementById('{{ form.num_grupos.id_for_label }}');
+    const numClassificadosField = document.getElementById('{{ form.num_classificados.id_for_label }}');
+    const confrontosMesmoGrupoDiv = document.getElementById('confrontos-mesmo-grupo');
+    
+    function updateFieldsBasedOnFormat() {
+        const formato = tipoFormatoSelect.value;
+        
+        if (formato === 'liga') {
+            // Liga: tornar os campos readonly e definir valores padrão
+            numGruposField.readOnly = true;
+            numClassificadosField.readOnly = true;
+            numGruposField.value = '0';
+            numClassificadosField.value = '0';
+            numGruposField.parentElement.style.opacity = '0.5';
+            numClassificadosField.parentElement.style.opacity = '0.5';
+            confrontosMesmoGrupoDiv.style.display = 'none';
+        } else if (formato === 'mata_mata') {
+            // Mata-mata: tornar os campos readonly e definir valores padrão
+            numGruposField.readOnly = true;
+            numClassificadosField.readOnly = true;
+            numGruposField.value = '0';
+            numClassificadosField.value = '0';
+            numGruposField.parentElement.style.opacity = '0.5';
+            numClassificadosField.parentElement.style.opacity = '0.5';
+            confrontosMesmoGrupoDiv.style.display = 'none';
+        } else if (formato === 'misto') {
+            // Misto: habilitar grupos, classificados e mostrar campo de confrontos
+            numGruposField.readOnly = false;
+            numClassificadosField.readOnly = false;
+            numGruposField.parentElement.style.opacity = '1';
+            numClassificadosField.parentElement.style.opacity = '1';
+            confrontosMesmoGrupoDiv.style.display = 'flex';
+            // Limpar valores para forçar o usuário a definir
+            if (numGruposField.value === '0') numGruposField.value = '';
+            if (numClassificadosField.value === '0') numClassificadosField.value = '';
+        } else {
+            // Outros formatos: habilitar grupos e classificados
+            numGruposField.readOnly = false;
+            numClassificadosField.readOnly = false;
+            numGruposField.parentElement.style.opacity = '1';
+            numClassificadosField.parentElement.style.opacity = '1';
+            confrontosMesmoGrupoDiv.style.display = 'none';
+        }
+    }
+    
+    // Aplicar regras no carregamento da página
+    updateFieldsBasedOnFormat();
+    
+    // Aplicar regras quando o formato mudar
+    tipoFormatoSelect.addEventListener('change', updateFieldsBasedOnFormat);
+    
+    // Ao submeter o formulário, garantir que campos tenham valores válidos
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const formato = tipoFormatoSelect.value;
+        
+        if (formato === 'liga' || formato === 'mata_mata') {
+            // Garantir que tenham valores válidos
+            if (!numGruposField.value || numGruposField.value === '') {
+                numGruposField.value = '0';
+            }
+            if (!numClassificadosField.value || numClassificadosField.value === '') {
+                numClassificadosField.value = '0';
+            }
+        }
+        
+        // Não prevenir o envio padrão
+        return true;
+    });
+});
+</script>
+{% endblock %}
