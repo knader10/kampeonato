@@ -1,3 +1,5 @@
+from decouple import config
+
 # Mercado Pago
 MERCADOPAGO_ACCESS_TOKEN = "TEST-8219844833085232-072321-06ac011cb0d56ab43f7b6fc36c81ae83-119385294"
 """
@@ -24,8 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOGIN_URL = '/painel/login'
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fr9cvkw%kb_!dt9%qz_$^@09hwqhi#efyw!v9^&4bu6@3ovx9-'
+SECRET_KEY = config('SECRET_KEY')
+MERCADOPAGO_ACCESS_TOKEN = config('MERCADOPAGO_ACCESS_TOKEN')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
