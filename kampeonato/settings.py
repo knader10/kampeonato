@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '*.ngrok-free.app',
     'https://sgek10.com.br',
-    '103.199.187.53',  # IP do servidor
+    '103.199.187.59',  # IP do servidor
     'sgek10.com.br',  # Domínio do servidor
     'www.sgek10.com.br', 
     'teste', # Domínio com 'www' # Permite qualquer subdomínio do ngrok
@@ -188,7 +188,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://aee7aa6a0b86.ngrok-free.app",
     "https://332ce48050e3.ngrok-free.app",
     "https://sgek10.com.br",
-    "https://103.199.187.53",  # Corrigido
+    "https://103.199.187.59",  # Corrigido
     "https://www.sgek10.com.br",  # Corrigido
 ]
 
@@ -206,7 +206,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'https://sgek10.com.br',
     'https://www.sgek10.com.br',
-    'https://103.199.187.53',  # Corrigido
+    'https://103.199.187.59',  # Corrigido
 ]
 
 # Configurações adicionais para ngrok
