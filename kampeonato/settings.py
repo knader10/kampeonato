@@ -34,11 +34,12 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '*.ngrok-free.app',
+    'sgek10.com.br',
+    'www.sgek10.com.br',
     'https://sgek10.com.br',
-    '103.199.187.59',  # IP do servidor
-    'sgek10.com.br',  # Domínio do servidor
-    'www.sgek10.com.br', 
-    'teste', # Domínio com 'www' # Permite qualquer subdomínio do ngrok
+    'https://www.sgek10.com.br',
+    '103.199.187.59',
+    '*.sgek10.com.br',  # Permite qualquer subdomínio de sgek10.com.br
 ]
 
 
