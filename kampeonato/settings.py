@@ -141,16 +141,15 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/kampeonato/static_collected/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Configurações para arquivos de mídia (imagens)
+# Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/var/www/kampeonato/media/'
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
