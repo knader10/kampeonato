@@ -16,7 +16,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-
+STATIC_ROOT = '/root/kampeonato/static_collected'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,7 +57,7 @@ ALLOWED_HOSTS = [
     'https://sgek10.com.br',
     'https://www.sgek10.com.br',
     '103.199.187.59',
-    '*.sgek10.com.br',  # Permite qualquer subdomínio de sgek10.com.br
+    'sgek10.com.br',  # Permite qualquer subdomínio de sgek10.com.br
 ]
 
 

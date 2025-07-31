@@ -1,0 +1,481 @@
+/* Estilos específicos para o gerenciamento de partidas */
+
+/* Container principal */
+.partida-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Cartão de informações da partida */
+.partida-info-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Placar central */
+.placar-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.teams-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.team-info {
+    text-align: center;
+    min-width: 120px;
+}
+
+.team-escudo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.team-nome {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* Placar inputs - específico */
+.placar-input {
+    width: 80px !important;
+    height: 60px !important;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: white;
+    color: #374151;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.placar-input:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.placar-input:hover {
+    border-color: #9CA3AF;
+}
+
+.placar-vs {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 16px;
+}
+
+/* Abas de navegação */
+.tab-navigation {
+    display: flex;
+    background: white;
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 16px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    background: #3B82F6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.tab-button:not(.active):hover {
+    background: #F3F4F6;
+}
+
+/* Conteúdo das abas */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards das seções */
+.section-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E5E7EB;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Formulários */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.form-input, .form-select, .form-textarea {
+    padding: 8px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Botões */
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-primary {
+    background: #3B82F6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563EB;
+}
+
+.btn-success {
+    background: #10B981;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-danger {
+    background: #EF4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #DC2626;
+}
+
+.btn-secondary {
+    background: #6B7280;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4B5563;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+/* Listas de gols e cartões */
+.eventos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.evento-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: #F9FAFB;
+    border-radius: 6px;
+    border-left: 4px solid #3B82F6;
+}
+
+.evento-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.evento-tipo {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.gol .evento-tipo {
+    background: #10B981;
+    color: white;
+}
+
+.cartao-amarelo .evento-tipo {
+    background: #F59E0B;
+    color: white;
+}
+
+.cartao-vermelho .evento-tipo {
+    background: #EF4444;
+    color: white;
+}
+
+.evento-detalhes {
+    flex: 1;
+}
+
+.evento-jogador {
+    font-weight: 500;
+    color: #374151;
+}
+
+.evento-time {
+    font-size: 0.8rem;
+    color: #6B7280;
+}
+
+.evento-minuto {
+    font-size: 0.8rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* Actions */
+.evento-actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-agendada {
+    background: #DBEAFE;
+    color: #1D4ED8;
+}
+
+.status-em-andamento {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.status-finalizada {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.status-cancelada {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .partida-container {
+        padding: 16px;
+    }
+    
+    .teams-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .placar-vs {
+        margin: 8px 0;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tab-navigation {
+        flex-direction: column;
+    }
+    
+    .evento-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .evento-actions {
+        align-self: stretch;
+        justify-content: flex-end;
+    }
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #6B7280;
+}
+
+.breadcrumb a {
+    color: #3B82F6;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: #D1D5DB;
+}
+
+/* Auto-save indicator */
+.auto-save-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 8px 12px;
+    background: #10B981;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.auto-save-indicator.show {
+    opacity: 1;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #E5E7EB;
+    border-top: 2px solid #3B82F6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Atalhos de teclado */
+.keyboard-shortcut {
+    font-size: 0.7rem;
+    color: #9CA3AF;
+    margin-left: 8px;
+    padding: 2px 4px;
+    background: #F3F4F6;
+    border-radius: 3px;
+}
+
+/* Empty states */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6B7280;
+}
+
+.empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    color: #D1D5DB;
+}
+
+.empty-state h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
