@@ -7,7 +7,7 @@
 {% block content %}
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-semibold text-gray-800">Campeonatos</h1>
-    {% if tem_plano_ativo %}
+    {% if tem_plano_ativo or user.is_superuser %}
         <a href="{% url 'campeonato:campeonato_create' %}" class="btn btn-primary">
             <i class="bi bi-plus me-2"></i> Novo Campeonato
         </a>
@@ -90,7 +90,7 @@
                 <i class="bi bi-trophy text-6xl text-gray-300 mb-4"></i>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum campeonato cadastrado</h3>
                 <p class="text-gray-500 mb-4">Comece criando seu primeiro campeonato.</p>
-                {% if tem_plano_ativo %}
+                {% if tem_plano_ativo or user.is_superuser %}
                     <a href="{% url 'campeonato:campeonato_create' %}" class="btn btn-primary">
                         <i class="bi bi-plus me-2"></i> Criar Primeiro Campeonato
                     </a>
