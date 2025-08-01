@@ -138,7 +138,12 @@ def usuario_tem_plano_ativo(user) -> bool:
     """
     Verifica se o usuário possui um plano ativo de verdade.
     Considera assinatura ativa se existir uma assinatura com status 'ativo' e data de validade maior ou igual a hoje.
+    Superusers sempre têm acesso total.
     """
+    # Superusers sempre têm acesso
+    if user.is_superuser:
+        return True
+        
     from datetime import date
     try:
         # Ajuste o import/modelo conforme seu projeto
@@ -152,7 +157,12 @@ def usuario_tem_plano_ativo(user) -> bool:
 def get_usuario_plano_atual(user) -> Optional[str]:
     """
     Retorna o ID do plano atual do usuário, se houver.
+    Superusers têm plano 'admin'.
     """
+    # Superusers têm plano especial
+    if user.is_superuser:
+        return "admin"
+        
     if usuario_tem_plano_ativo(user):
         # Exemplo: retornar o plano do usuário
         # return user.assinatura_set.get(status='ativo').plano_id
@@ -163,7 +173,20 @@ def get_usuario_plano_atual(user) -> Optional[str]:
 def get_usuario_assinatura_info(user) -> Optional[Dict]:
     """
     Retorna informações da assinatura atual do usuário, se houver.
+    Para superusers, retorna informações especiais.
     """
+    # Para superusers, retornar acesso total
+    if user.is_superuser:
+        return {
+            "plano_id": "admin",
+            "plano_nome": "Administrador",
+            "status": "ativo",
+            "data_renovacao": "Ilimitado",
+            "periodicidade": "permanente",
+            "preco_atual": 0.00,
+            "dias_para_renovacao": "∞"
+        }
+    
     if not usuario_tem_plano_ativo(user):
         return None
     # Exemplo: buscar dados reais da assinatura

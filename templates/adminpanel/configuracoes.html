@@ -13,63 +13,102 @@
 
     <!-- Status do Plano Atual -->
     {% if assinatura_info %}
-    <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-lg text-white mb-8 overflow-hidden">
-        <div class="p-8">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div class="mb-6 lg:mb-0">
-                    <div class="flex items-center mb-2">
-                        <i class="bi bi-star-fill text-yellow-300 text-xl mr-2"></i>
-                        <span class="text-lg font-semibold">Plano {{ assinatura_info.plano_nome }}</span>
-                        <span class="ml-3 px-3 py-1 bg-green-500 text-white text-sm rounded-full">{{ assinatura_info.status|upper }}</span>
+        {% if user.is_superuser %}
+        <div class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl shadow-lg text-white mb-8 overflow-hidden">
+            <div class="p-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div class="mb-6 lg:mb-0">
+                        <div class="flex items-center mb-2">
+                            <i class="bi bi-shield-check text-yellow-300 text-xl mr-2"></i>
+                            <span class="text-lg font-semibold">Acesso de Administrador</span>
+                            <span class="ml-3 px-3 py-1 bg-yellow-500 text-purple-900 text-sm rounded-full font-bold">ADMIN</span>
+                        </div>
+                        <p class="text-purple-100 mb-4">Acesso total e ilimitado a todas as funcionalidades</p>
+                        
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                            <div>
+                                <span class="text-purple-200 block">Status</span>
+                                <span class="font-semibold">Ativo</span>
+                            </div>
+                            <div>
+                                <span class="text-purple-200 block">Validade</span>
+                                <span class="font-semibold">Ilimitada</span>
+                            </div>
+                            <div>
+                                <span class="text-purple-200 block">Tipo</span>
+                                <span class="font-semibold">Administrador</span>
+                            </div>
+                            <div>
+                                <span class="text-purple-200 block">Nível</span>
+                                <span class="font-semibold">Máximo</span>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-blue-100 mb-4">R$ {{ assinatura_info.preco_atual }}/{{ assinatura_info.periodicidade }} • Renovação automática em {{ assinatura_info.dias_para_renovacao }} dias</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-lg text-white mb-8 overflow-hidden">
+            <div class="p-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div class="mb-6 lg:mb-0">
+                        <div class="flex items-center mb-2">
+                            <i class="bi bi-star-fill text-yellow-300 text-xl mr-2"></i>
+                            <span class="text-lg font-semibold">Plano {{ assinatura_info.plano_nome }}</span>
+                            <span class="ml-3 px-3 py-1 bg-green-500 text-white text-sm rounded-full">{{ assinatura_info.status|upper }}</span>
+                        </div>
+                        <p class="text-blue-100 mb-4">R$ {{ assinatura_info.preco_atual }}/{{ assinatura_info.periodicidade }} • Renovação automática em {{ assinatura_info.dias_para_renovacao }} dias</p>
+                        
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                            <div>
+                                <span class="text-blue-200 block">Status</span>
+                                <span class="font-semibold">{{ assinatura_info.status|capfirst }}</span>
+                            </div>
+                            <div>
+                                <span class="text-blue-200 block">Renovação</span>
+                                <span class="font-semibold">{{ assinatura_info.data_renovacao }}</span>
+                            </div>
+                            <div>
+                                <span class="text-blue-200 block">Periodicidade</span>
+                                <span class="font-semibold">{{ assinatura_info.periodicidade|capfirst }}</span>
+                            </div>
+                            <div>
+                                <span class="text-blue-200 block">Plano</span>
+                                <span class="font-semibold">{{ assinatura_info.plano_nome }}</span>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                        <div>
-                            <span class="text-blue-200 block">Status</span>
-                            <span class="font-semibold">{{ assinatura_info.status|capfirst }}</span>
-                        </div>
-                        <div>
-                            <span class="text-blue-200 block">Renovação</span>
-                            <span class="font-semibold">{{ assinatura_info.data_renovacao }}</span>
-                        </div>
-                        <div>
-                            <span class="text-blue-200 block">Periodicidade</span>
-                            <span class="font-semibold">{{ assinatura_info.periodicidade|capfirst }}</span>
-                        </div>
-                        <div>
-                            <span class="text-blue-200 block">Plano</span>
-                            <span class="font-semibold">{{ assinatura_info.plano_nome }}</span>
-                        </div>
+                    <div class="flex flex-col space-y-3 lg:ml-8">
+                        <button class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all">
+                            <i class="bi bi-arrow-up-circle mr-2"></i>Fazer Upgrade
+                        </button>
+                        <button class="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all">
+                            <i class="bi bi-gear mr-2"></i>Alterar Plano
+                        </button>
                     </div>
                 </div>
-                
-                <div class="flex flex-col space-y-3 lg:ml-8">
-                    <button class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all">
-                        <i class="bi bi-arrow-up-circle mr-2"></i>Fazer Upgrade
-                    </button>
-                    <button class="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all">
-                        <i class="bi bi-gear mr-2"></i>Alterar Plano
-                    </button>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        {% if not user.is_superuser %}
+        <div class="bg-gradient-to-r from-gray-600 to-gray-700 rounded-xl shadow-lg text-white mb-8 overflow-hidden">
+            <div class="p-8 text-center">
+                <div class="mb-6">
+                    <i class="bi bi-exclamation-circle text-yellow-300 text-4xl mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-2">Nenhum Plano Ativo</h2>
+                    <p class="text-gray-200">Escolha um plano abaixo para começar a usar o Kampeonato</p>
+                </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% else %}
-    <div class="bg-gradient-to-r from-gray-600 to-gray-700 rounded-xl shadow-lg text-white mb-8 overflow-hidden">
-        <div class="p-8 text-center">
-            <div class="mb-6">
-                <i class="bi bi-exclamation-circle text-yellow-300 text-4xl mb-4"></i>
-                <h2 class="text-2xl font-bold mb-2">Nenhum Plano Ativo</h2>
-                <p class="text-gray-200">Escolha um plano abaixo para começar a usar o Kampeonato</p>
-            </div>
-        </div>
-    </div>
+        {% endif %}
     {% endif %}
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Histórico de Pagamentos (se houver assinatura) -->
-        {% if assinatura_info %}
+        <!-- Histórico de Pagamentos (se houver assinatura e não for superuser) -->
+        {% if assinatura_info and not user.is_superuser %}
         <div class="lg:col-span-3">
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="bg-gray-800 text-white px-6 py-4">
